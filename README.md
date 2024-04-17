@@ -1,4 +1,4 @@
-![logo](supun-new.png)
+![logo](introduction.png)
 
 <table>
   <tr>

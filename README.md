@@ -111,13 +111,12 @@
 <p align="center">
 <img src="https://media.tenor.com/0ENB5HuTH0gAAAAi/trophy-beker.gif"  width="100px" height="100px"></p>
   
-<div align="center">
-<img src="https://github-profile-trophy.vercel.app/?username=WebDevTitan&theme=matrix&no-bg=true&no-frame=true&row=1&column=4&title=MultiLanguage,Commits,PullRequest,Reviews">
- </div>
+<p align="center">
+  <img src="https://github-profile-trophy.vercel.app/?username=WebDevTitan&column=7&theme=onedark"/>
+</p>
 
-<div align="center">
-<img src="https://github-profile-trophy.vercel.app/?username=WebDevTitan&theme=matrix&no-bg=true&no-frame=true&row=1&column=4&title=Repositories,Organizations,Stars,Followers">
- </div>
- <br><br>
+<p align = "center">
+  <img src = "https://github-readme-stats.vercel.app/api/top-langs/?username=WebDevTitan&langs_count=8&layout=compact&theme=tokyonight&include_all_commits=true&line_height=27">
+</p>
 
 <img src="https://i.imgur.com/dBaSKWF.gif" height="20" width="100%">

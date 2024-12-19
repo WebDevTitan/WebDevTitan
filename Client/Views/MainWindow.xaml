@@ -1,0 +1,848 @@
+﻿<Window x:Class="Project.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:converters="clr-namespace:Project.Converters"
+        xmlns:fa5="http://schemas.fontawesome.com/icons/"
+        xmlns:local="clr-namespace:Project.Views"
+        xmlns:prism="http://prismlibrary.com/"
+        prism:ViewModelLocator.AutoWireViewModel="True"
+        mc:Ignorable="d"
+        WindowStyle="None"
+        WindowStartupLocation="CenterScreen"
+        Title="GBot" Height="702.682" Width="1000" Background="#FF535353" ResizeMode="NoResize"
+        BorderBrush="#FF046647" BorderThickness="2" MouseDown="Window_MouseDown" Closed="Window_Closed"
+        >
+    <Window.Resources>
+        <converters:InverseBooleanConverter x:Key="oppositeConverter"/>
+
+        <Style x:Key="ConsoleTextBox" TargetType="{x:Type TextBox}">
+            <Setter Property="IsReadOnly" Value="True"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <ScrollViewer RenderTransformOrigin="0.5,0.5" VerticalScrollBarVisibility="Auto">
+
+                            <TextBox Text="{TemplateBinding Text}" RenderTransformOrigin="0.5,0.5">
+
+                            </TextBox>
+                        </ScrollViewer>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ContentsTitle" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="Black" />
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="TextAlignment" Value="Left"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="ContentsDescription" TargetType="TextBlock">
+
+            <Setter Property="Width" Value="100"/>
+            <Setter Property="Foreground" Value="Black" />
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="TextAlignment" Value="Left"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="ContentsValueLabel" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="DimGray" />
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="TextAlignment" Value="Left"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="ContentsValue" TargetType="TextBox">
+            <Setter Property="Width" Value="150" />
+            <Setter Property="Height" Value="23" />
+            <Setter Property="Margin" Value="10,0" />
+            <Setter Property="Foreground" Value="DimGray" />
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="TextAlignment" Value="Left"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <SolidColorBrush x:Key="ControlBorder" Color="#646464" />
+        <Style x:Key="FocusVisual">
+            <Setter Property="Control.Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Rectangle Margin="2" SnapsToDevicePixels="true" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" StrokeDashArray="1 2"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <SolidColorBrush x:Key="Button.Static.Background" Color="#FFDDDDDD"/>
+        <SolidColorBrush x:Key="Button.Static.Border" Color="#FF707070"/>
+        <SolidColorBrush x:Key="Button.MouseOver.Background" Color="#FFBEE6FD"/>
+        <SolidColorBrush x:Key="Button.MouseOver.Border" Color="#FF3C7FB1"/>
+        <SolidColorBrush x:Key="Button.Pressed.Background" Color="#FFC4E5F6"/>
+        <SolidColorBrush x:Key="Button.Pressed.Border" Color="#FF2C628B"/>
+        <SolidColorBrush x:Key="Button.Disabled.Background" Color="#FFF4F4F4"/>
+        <SolidColorBrush x:Key="Button.Disabled.Border" Color="#FFADB2B5"/>
+        <SolidColorBrush x:Key="Button.Disabled.Foreground" Color="#FF838383"/>
+        <Style x:Key="ToolbarButtonStyle" TargetType="{x:Type Button}">
+            <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}"/>
+            <Setter Property="Background" Value="#FBFAFA"/>
+            <Setter Property="BorderBrush" Value="#C8C7C7"/>
+            <Setter Property="Foreground" Value="#727171"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="1"/>
+            <Setter Property="Width" Value="30" />
+            <Setter Property="Height" Value="30" />
+            <Setter Property="Margin" Value="1 0" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border x:Name="border" CornerRadius="4" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="true">
+                            <ContentPresenter x:Name="contentPresenter" Focusable="False" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsDefaulted" Value="true">
+                                <Setter Property="BorderBrush" TargetName="border" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter Property="Background" TargetName="border" Value="#91C8FD"/>
+                                <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource Button.MouseOver.Border}"/>
+                                <Setter Property="BorderThickness" TargetName="border" Value="2"/>
+                                <Setter Property="TextElement.Foreground" TargetName="contentPresenter" Value="White"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="true">
+                                <Setter Property="Background" TargetName="border" Value="#59ADFF"/>
+                                <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource Button.Pressed.Border}"/>
+                                <Setter Property="TextElement.Foreground" TargetName="contentPresenter" Value="White"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Background" TargetName="border" Value="{StaticResource Button.Disabled.Background}"/>
+                                <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource Button.Disabled.Border}"/>
+                                <Setter Property="TextElement.Foreground" TargetName="contentPresenter" Value="{StaticResource Button.Disabled.Foreground}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="{x:Type RadioButton}" x:Key="MenuRadioButton">
+            <Setter Property="Foreground" Value="#32AF8D" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Height" Value="30" />
+            <Setter Property="Margin" Value="5" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type RadioButton}">
+                        <BulletDecorator>
+                            <Grid>
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                <!--We don't need any bullet, cause our border is the switching element-->
+                                <Border Margin="5,25,5,0" Background="Transparent" BorderThickness="1" CornerRadius="1" x:Name="RadioMark" />
+                                <!-- To change the apearance to button stripe 2, edit the margins! -->
+                            </Grid>
+                        </BulletDecorator>
+
+                        <!--If item is checked, trigger the visibility of the mark-->
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="true">
+                                <Setter TargetName="RadioMark" Property="Background" Value="#32AF8D"/>
+                            </Trigger>
+
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Foreground" Value="#38c39d" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+
+            <RowDefinition Height="60"/>
+            <RowDefinition Height="570*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="150"/>
+            <ColumnDefinition Width="700*"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Row="0" Grid.Column="0">
+            <Image Source="../Images/logo_goldbet.png" Stretch="Fill" Name="logoImage"/>
+        </Grid>
+        <Grid Grid.Row="0" Grid.Column="1" Background="#FF14805E" Name="TitlePanel">
+            <DockPanel HorizontalAlignment="Right" VerticalAlignment="Top" >
+                <Button Width="30" Height="30" Background="Transparent" Command="{Binding WindowCommand}" CommandParameter="BROWSER" BorderBrush="Transparent">
+                    <fa5:SvgAwesome Icon="Solid_Home" Height="17" Opacity="0.6" Foreground="#FFC9E2D6"/>
+                </Button>
+                <Button Width="30" Height="30" Background="Transparent" Command="{Binding WindowCommand}" CommandParameter="MINIMIZE" BorderBrush="Transparent">
+                    <fa5:SvgAwesome Icon="Regular_WindowMinimize" Height="17" Opacity="0.6" Foreground="#FFC9E2D6"/>
+                </Button>
+                <Button Width="30" Height="30" Background="Transparent" Command="{Binding WindowCommand}" CommandParameter="RESTORE" BorderBrush="Transparent">
+                    <fa5:SvgAwesome Icon="Regular_WindowRestore" Height="17" Opacity="0.6" IsEnabled="False" Foreground="#FFC9E2D6"/>
+                </Button>
+                <Button Width="30" Height="30" Background="Transparent" Command="{Binding WindowCommand}" CommandParameter="CLOSE" BorderBrush="Transparent">
+                    <fa5:SvgAwesome Icon="Regular_WindowClose" Height="17" Opacity="0.6" Foreground="#FFC9E2D6"/>
+                </Button>
+            </DockPanel>
+        </Grid>
+        <Grid Grid.Row="1" Grid.Column="0" Margin="0, 0, 0, 0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="0*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="250"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="30"/>
+            </Grid.RowDefinitions>
+            <RadioButton Grid.Row="0" Style="{StaticResource MenuRadioButton}" IsChecked="True" Command="{Binding MenuCommand}" CommandParameter="BET" Content="Bet" Margin="5,10,4,10" Height="Auto" Checked="RadioButton_Checked"/>
+            <RadioButton Grid.Row="1" Style="{StaticResource MenuRadioButton}" Command="{Binding MenuCommand}" CommandParameter="SETTING" Content="Setting" Margin="5,10,4,10" Height="Auto"/>
+            <Image Grid.Row="2" Source="../Images/logo_goldbet.png" Stretch="Fill" Name="logoImage1" Margin="10,0,10,115"/>
+            <TextBlock Grid.Row="4" Text="ValueBot v" VerticalAlignment="Bottom" HorizontalAlignment="Center" FontSize="16" Padding="0,10" Foreground="#FFC9E2D6" Name="VersionLabel" Margin="10,0,8,29" Grid.RowSpan="2" Height="41" Width="132"/>
+            <TextBlock Grid.Row="5" Text="Telegram   @betting_dev " TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="12" Padding="0,0" Foreground="#FFC9E2D6" Name="CopyrightsLabel" Visibility="Collapsed" Margin="92,0,58,0" Height="0" Width="0"/>
+        </Grid>
+        <Grid Grid.Row="1" Grid.Column="1" Margin="0, 0, 0, 0" Background="White">
+            <Grid Visibility="{Binding CurrentTab, ConverterParameter=BET, Converter={converters:StringToVisibilityConverter}}" d:IsHidden="True">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="41"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="6*"/>
+                    <ColumnDefinition Width="5*"/>
+                </Grid.ColumnDefinitions>
+
+                <Grid Grid.Row="0" Grid.ColumnSpan="2" Background="WhiteSmoke">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="91*"/>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="91*"/>
+                        <ColumnDefinition Width="418"/>
+                        <ColumnDefinition Width="82*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border BorderBrush="{StaticResource ControlBorder}" BorderThickness="0 0 1 1" Grid.ColumnSpan="5"/>
+                    <DockPanel Grid.Column="1" HorizontalAlignment="Left" Width="64">
+                        <Button Style="{StaticResource ToolbarButtonStyle}" Command="{Binding StartCommand}" IsEnabled="{Binding IsStopped, Mode=TwoWay}">
+                            <fa5:SvgAwesome Icon="Solid_Play" Height="17" Opacity="0.8">
+                                <fa5:SvgAwesome.Style>
+                                    <Style TargetType="fa5:SvgAwesome">
+                                        <Setter Property="Foreground" Value="LightGray"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsStopped}" Value="true">
+                                                <Setter Property="Foreground" Value="DarkGreen" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </fa5:SvgAwesome.Style>
+                            </fa5:SvgAwesome>
+                        </Button>
+                        <Button Style="{StaticResource ToolbarButtonStyle}" Command="{Binding StopCommand}" IsEnabled="{Binding IsStarted, Mode=TwoWay}">
+                            <fa5:SvgAwesome Icon="Solid_Stop" Height="17" Opacity="0.8">
+                                <fa5:SvgAwesome.Style>
+                                    <Style TargetType="fa5:SvgAwesome">
+                                        <Setter Property="Foreground" Value="LightGray"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsStarted}" Value="true">
+                                                <Setter Property="Foreground" Value="DarkGreen" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </fa5:SvgAwesome.Style>
+                            </fa5:SvgAwesome>
+                        </Button>
+                    </DockPanel>
+                    <StackPanel Grid.Column="3" Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource ContentsDescription}" Text="Account" Width="90" Padding="20,0" TextAlignment="Right"/>
+                        <TextBlock Style="{StaticResource ContentsValueLabel}" Text="{Binding AccountId}" Width="100"/>
+                        <TextBlock Style="{StaticResource ContentsDescription}" Text="Balance" Width="90" Padding="20,0" TextAlignment="Right"/>
+                        <TextBlock Style="{StaticResource ContentsValueLabel}" Text="{Binding Balance}" Width="100"/>
+                        <Button Style="{StaticResource ToolbarButtonStyle}" Command="{Binding RefreshBalanceCommand}" IsEnabled="{Binding RefreshableBalance, Mode=TwoWay}"  Visibility="Visible">
+
+                            <fa5:SvgAwesome Icon="Solid_SyncAlt" Height="17" Opacity="0.8">
+                                <fa5:SvgAwesome.Style>
+                                    <Style TargetType="fa5:SvgAwesome">
+                                        <Setter Property="Foreground" Value="LightGray"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding RefreshableBalance}" Value="true">
+                                                <Setter Property="Foreground" Value="DarkGreen" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </fa5:SvgAwesome.Style>
+                            </fa5:SvgAwesome>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+
+                <Grid Grid.Row="1" Grid.Column="0" Margin="30, 0, 0, 20">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="40"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Style="{StaticResource ContentsDescription}" Text="Server Valuebet" Height="20"/>
+                    <Grid Grid.Row="1">
+                        <Border BorderBrush="{StaticResource ControlBorder}" BorderThickness="0 0 0 2" />
+                        <DataGrid GridLinesVisibility="None" VerticalGridLinesBrush="#FF151414" AutoGenerateColumns="False" CanUserSortColumns="False" HeadersVisibility="All" IsReadOnly="True" ItemsSource="{Binding ServerSureBetList}" Background="White">
+                            <DataGrid.RowHeaderStyle>
+                                <Style>
+                                    <Setter Property="Control.Background" Value="Transparent"/>
+                                </Style>
+                            </DataGrid.RowHeaderStyle>
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="%" Binding="{Binding percent}" Width="41*"/>
+                                <DataGridTextColumn Header="Sports" Binding="{Binding sport}" Width="70*"/>
+                                <DataGridTextColumn Header="Event title" Binding="{Binding eventTitle}" Width="240*"/>
+                                <DataGridTextColumn Header="Outcome" Binding="{Binding outcome}" Width="87*"/>
+                                <DataGridTextColumn Header="Odds" Binding="{Binding odds}" Width="63*"/>
+                                <DataGridTextColumn Header="Updated" Binding="{Binding updated}" Width="100*"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </Grid>
+                <Grid Grid.Row="1" Grid.Column="1" Margin="30, 0, 30, 20">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="40"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Style="{StaticResource ContentsDescription}" Text="Log" Height="20"/>
+                    <TextBox Grid.Row="3" Text="{Binding LogText}" Style="{StaticResource ConsoleTextBox}" VerticalScrollBarVisibility="Visible" BorderBrush="Azure"/>
+                </Grid>
+
+                <Grid Grid.Row="2" Grid.ColumnSpan="2" Margin="30, 0, 30, 20">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="40"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="50" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Style="{StaticResource ContentsDescription}" Text="History" Height="20" HorizontalAlignment="Left"/>
+                        <TextBlock Grid.Column="2" Style="{StaticResource ContentsDescription}" Text="Total Bet"  Padding="20,0" TextAlignment="Right"/>
+                        <TextBlock Grid.Column="3" Style="{StaticResource ContentsValueLabel}" Text="{Binding TotalBet}" Width="150"/>
+                        <Button Grid.Column="4" Style="{StaticResource ToolbarButtonStyle}" Command="{Binding ClearBetHistory}" Visibility="Visible" IsEnabled="True">
+                            <fa5:SvgAwesome Icon="Solid_Trash" Height="17" Opacity="0.8">
+                                <fa5:SvgAwesome.Style>
+                                    <Style TargetType="fa5:SvgAwesome">
+                                        <Setter Property="Foreground" Value="DarkGreen"/>
+                                    </Style>
+                                </fa5:SvgAwesome.Style>
+                            </fa5:SvgAwesome>
+                        </Button>
+                    </Grid>
+
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="751*"/>
+                            <ColumnDefinition Width="35*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border BorderBrush="{StaticResource ControlBorder}" BorderThickness="0 0 0 2" Grid.ColumnSpan="2" />
+                        <DataGrid GridLinesVisibility="None" VerticalGridLinesBrush="#FF151414" AutoGenerateColumns="False" CanUserSortColumns="False" HeadersVisibility="All" IsReadOnly="True" ItemsSource="{Binding FinishedBetList}" Background="White" Grid.ColumnSpan="2">
+                            <DataGrid.RowHeaderStyle>
+                                <Style>
+                                    <Setter Property="Control.Background" Value="Transparent"/>
+                                </Style>
+                            </DataGrid.RowHeaderStyle>
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Percentage" Binding="{Binding percent}" Width="20*"/>
+                                <DataGridTextColumn Header="Bookmarker" Binding="{Binding opbookmaker}" Width="20*"/>
+                                <DataGridTextColumn Header="Sport" Binding="{Binding sport}" Width="20*"/>
+                                <DataGridTextColumn Header="EventLine" Binding="{Binding eventTitle}" Width="20*"/>
+                                <DataGridTextColumn Header="HomeTeam" Binding="{Binding homeTeam}" Width="20*"/>
+                                <DataGridTextColumn Header="AwayTeam" Binding="{Binding awayTeam}" Width="20*"/>
+                                <DataGridTextColumn Header="Market" Binding="{Binding outcome}" Width="20*"/>
+                                <DataGridTextColumn Header="Odds" Binding="{Binding odds}" Width="20*"/>
+                                <DataGridTextColumn Header="Stake" Binding="{Binding stake}" Width="20*"/>
+                                <DataGridTextColumn Header="Played at" Binding="{Binding date}" Width="20*"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </Grid>
+            </Grid>
+            <Grid Visibility="{Binding CurrentTab, ConverterParameter=SETTING, Converter={converters:StringToVisibilityConverter}}" d:IsHidden="False">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="41"/>
+                    <RowDefinition Height="593"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="504"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+
+                <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Background="WhiteSmoke">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border BorderBrush="{StaticResource ControlBorder}" BorderThickness="0 0 1 1" Grid.ColumnSpan="3"/>
+
+                    <DockPanel HorizontalAlignment="Left" Grid.Column="1" d:LayoutOverrides="HorizontalAlignment">
+                        <Button Style="{StaticResource ToolbarButtonStyle}" Command="{Binding SettingViewModel.SaveSettingCommand}">
+                            <fa5:ImageAwesome Icon="Solid_Save" Height="16" Opacity="0.8" Foreground="DarkGreen"/>
+                        </Button>
+                    </DockPanel>
+                </Grid>
+
+                <StackPanel Grid.Row="1" Grid.Column="0" Margin="30,0,20,0">
+                    <Grid Height="40">
+                        <Border BorderBrush="{StaticResource ControlBorder}" BorderThickness="0 0 0 2" />
+                        <TextBlock Style="{StaticResource ContentsTitle}" Text="Account" />
+                    </Grid>
+                    <Grid Height="30">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,-29,0">
+                            <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Right" Text="Username"/>
+                            <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.UserId, Mode=TwoWay}"/>
+                            <TextBlock Style="{StaticResource ContentsDescription}" Name ="BIR_Label"  TextAlignment="Right" Text="Birthday" Margin="0,7" Width="47" Visibility="Hidden"/>
+                            <TextBox Style="{StaticResource ContentsValue}" Name="BIRTH_Text" Text="{Binding SettingViewModel.Birthday, Mode=TwoWay}" Height="22" Margin="10,4" Width="83" Visibility="Hidden"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Height="30">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Right" Text="Password" />
+                            <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.UserPwd}"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Height="30">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Right" Text="OTP" />
+                            <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.UserOtp}"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Height="30" Name="DomainPanel">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Right" Text="Domain" />
+                            <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.Domain}"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Height="40">
+                        <Border BorderBrush="{StaticResource ControlBorder}" BorderThickness="0 0 0 2" />
+                        <TextBlock Style="{StaticResource ContentsTitle}" Text="Configuration" />
+                    </Grid>
+                    <Grid Height="10"></Grid>
+                    <Grid Height="30">
+                        <TextBlock Style="{StaticResource ContentsDescription}" VerticalAlignment="Top" Padding="0,5" TextAlignment="Center" Text="Valuebet" Height="26" Width="70" FontWeight="Bold"/>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Height="20" Margin="80,5,10,0" Name="ValuebetPanel">
+                            <CheckBox x:Name="chkMode1" IsChecked="{Binding SettingViewModel.EnableValue1}" Width="120" Foreground="Black" VerticalAlignment="Center" Height="20" FontWeight="Bold">Betburger</CheckBox>
+                            <CheckBox x:Name="chkMode2" IsChecked="{Binding SettingViewModel.EnableValue2}" Width="120" Foreground="Black" VerticalAlignment="Center" Height="20" FontWeight="Bold">2nd Value</CheckBox>
+                            <CheckBox x:Name="chkMode3" IsChecked="{Binding SettingViewModel.EnableValue3}" Width="120" Foreground="Black" VerticalAlignment="Center" Height="20" FontWeight="Bold">3rd Value</CheckBox>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Height="65">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="80*"/>
+                            <ColumnDefinition Width="80*"/>
+                            <ColumnDefinition Width="80*"/>
+                            <ColumnDefinition Width="80*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Right" HorizontalAlignment="Right" Text="Sport" Margin="0,0,10,0" Width="60" Grid.Column="0"/>
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Column="1" Margin="0,8,0,-3">
+                            <Popup x:Name="SoccerTooltip" PlacementTarget="{Binding ElementName=SoccerCheckbox}" MouseLeave="SoccerTooltip_MouseLeave" Placement="Bottom">
+                                <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Top" Background="LightGray" IsEnabled="{Binding ElementName=SoccerCheckbox, Path=IsChecked}">
+                                    <CheckBox IsChecked="{Binding SettingViewModel.EnableSoccerMoneyline}" Foreground="Black" Height="20">1X2</CheckBox>
+                                    <CheckBox IsChecked="{Binding SettingViewModel.EnableSoccerHandicap}" Foreground="Black" Height="20">Handicaps</CheckBox>
+                                    <CheckBox IsChecked="{Binding SettingViewModel.EnableSoccerTotals}" Foreground="Black" Height="20">Totals</CheckBox>
+                                    <CheckBox IsChecked="{Binding SettingViewModel.EnableSoccerCorners}" Foreground="Black" Height="20">Corners</CheckBox>
+                                    <CheckBox IsChecked="{Binding SettingViewModel.EnableSoccerCards}" Foreground="Black" Height="20">Cards</CheckBox>
+                                </StackPanel>
+                            </Popup>
+                            <CheckBox Name="SoccerCheckbox" IsChecked="{Binding SettingViewModel.EnableSoccer}" Foreground="Black" Height="20" MouseRightButtonDown="SoccerCheckBox_MouseRightButtonDown">Soccer</CheckBox>
+                            <CheckBox IsChecked="{Binding SettingViewModel.EnableBasketBall}" Foreground="Black" Height="20">BasketBall</CheckBox>
+                            <CheckBox IsChecked="{Binding SettingViewModel.EnableVolleyBall}" Foreground="Black" Height="20">VolleyBall</CheckBox>
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Column="2" Margin="0,7,0,0">
+                            <CheckBox IsChecked="{Binding SettingViewModel.EnableBaseBall}" Foreground="Black" Height="20">BaseBall</CheckBox>
+                            <CheckBox IsChecked="{Binding SettingViewModel.EnableTennis}" Foreground="Black" Height="20">Tennis</CheckBox>
+                            <CheckBox IsChecked="{Binding SettingViewModel.EnableTableTenis}" Foreground="Black" Height="20">Table Tenis</CheckBox>
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Column="3" Margin="0,7,0,0">
+                            <CheckBox IsChecked="{Binding SettingViewModel.EnableHockey}" Foreground="Black" Height="20">Hockey</CheckBox>
+                            <CheckBox IsChecked="{Binding SettingViewModel.EnableRugby}" Foreground="Black" Height="20">Rugby</CheckBox>
+                            <CheckBox IsChecked="{Binding SettingViewModel.EnableESoccer}" Foreground="Black" Height="20">E-Sports</CheckBox>
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Column="4" Margin="0,7,0,0">
+                            <CheckBox IsChecked="{Binding SettingViewModel.EnableHandball}" Foreground="Black" Height="20">Handball</CheckBox>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Height="25">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="60*"/>
+                            <ColumnDefinition Width="167*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0" Grid.ColumnSpan="2">
+                            <CheckBox IsChecked="{Binding SettingViewModel.EnableSportsLessTime}" Width="90" Foreground="Black" VerticalAlignment="Center" Height="20" Margin="80,0,0,0" Name="EnableSportsLessTime">Only Before</CheckBox>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Height="20" Margin="10,0,0,0" Width="73">
+                                <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.SportsLessTimeMinute}" Margin="0" Width="40" Height="20" IsEnabled="{Binding ElementName=EnableSportsLessTime, Path=IsChecked}"/>
+                                <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Left" Text=" min" Margin="0,2" Width="28"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Height="25" Margin="0,5,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Right" Text="Arb Percent" HorizontalAlignment="Right" Grid.Column="0" Width="80" Margin="0,0,10,0" />
+                        <StackPanel Orientation="Horizontal" Grid.Column="1">
+                            <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.PercentageSports}" Width="40" Margin="0"/>
+                            <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Center" Text=" to" Width="30" Name="ArbToLabel"/>
+                            <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.PercentageToSports}" Width="40" Name="ArbToText"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Height="25" Margin="0,5,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Right" Text="Odd Range" Margin="0,0,10,0" HorizontalAlignment="Right" Grid.Column="0"/>
+                        <StackPanel Orientation="Horizontal" Grid.Column="1">
+                            <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.MinOddsSports}" Width="40" Margin="0"/>
+                            <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Center" Text=" to" Width="30"/>
+                            <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.MaxOddsSports}" Width="40"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Height="130" Margin="0,5,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="25"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Right" Text="Stake" Margin="0,0,10,0" Width="60" HorizontalAlignment="Right" Grid.Column="0"/>
+                        <StackPanel Orientation="Horizontal" Grid.Column="1">
+                            <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.StakeSports}" Width="40" Margin="0"/>
+                            <CheckBox IsChecked="{Binding SettingViewModel.EnableStakeSportsTo}" Foreground="Black" VerticalAlignment="Center" Height="20" Visibility="Visible" Margin="10,5,5,0" Name="EnableStakeTo" IsEnabled="{Binding ElementName=StakePercentage, Path=IsChecked, Converter={StaticResource oppositeConverter}}">to</CheckBox>
+                            <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.StakeSportsTo}" Width="40" Margin="0" IsEnabled="{Binding ElementName=EnableStakeTo, Path=IsChecked}"/>
+                            <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Left" Text="(for set range stake)" Margin="5,5,0,0" Width="110" Foreground="Gray"/>
+                            <CheckBox IsChecked="{Binding SettingViewModel.PercentageStakeMode}" Foreground="Black" VerticalAlignment="Center" Height="20" Visibility="Visible" Margin="10,5,5,0" Name="StakePercentage">% Mode</CheckBox>
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Top" Visibility="Visible" Name="RangeStakePanel" Grid.Row="1" Grid.Column="1">
+                            <StackPanel Orientation="Horizontal">
+                                <CheckBox IsChecked="{Binding SettingViewModel.EnableRangeStake}" Width="115" Foreground="Black" Margin="7,7,0,3" Name="EnableRangeStake">Odd Range Stake</CheckBox>
+                                <!--<TextBlock Name="OddRangeMarketLabel" Style="{StaticResource ContentsDescription}" TextAlignment="Right" Text="Market    " Width="70"/>
+                                <ComboBox Name="OddRangeMarketCombo" Width="130" ItemsSource="{Binding SettingViewModel.OddRangeMarketList}" IsSynchronizedWithCurrentItem="True" SelectedItem="{Binding SettingViewModel.OddRangeMarketSelectedItem}"/>-->
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Height="25" Margin="0,0,0,0">
+                                <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Right" Text="Odd" Margin="0,0,10,0" Width="50" IsEnabled="True"/>
+                                <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.Range1_Start}" Width="30" Margin="0" IsEnabled="{Binding ElementName=EnableRangeStake, Path=IsChecked}"/>
+                                <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Center" Text="-" Width="20" Margin="0"/>
+                                <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.Range1_End}" Width="30" Margin="0" IsEnabled="{Binding ElementName=EnableRangeStake, Path=IsChecked}"/>
+                                <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Center" Text=":" Width="20" Margin="0"/>
+                                <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.Range1_Stake}" Width="30" Margin="0" IsEnabled="{Binding ElementName=EnableRangeStake, Path=IsChecked}"/>
+                                <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Center" Text=" to" Width="30"/>
+                                <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.Range1_StakeTo}" Width="30" Margin="0" IsEnabled="{Binding ElementName=EnableRangeStake, Path=IsChecked}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Height="25">
+                                <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Right" Text="Odd" Margin="0,0,10,0" Width="50"/>
+                                <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.Range2_Start}" Width="30" Margin="0" IsEnabled="{Binding ElementName=EnableRangeStake, Path=IsChecked}"/>
+                                <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Center" Text="-" Width="20" Margin="0"/>
+                                <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.Range2_End}" Width="30" Margin="0" IsEnabled="{Binding ElementName=EnableRangeStake, Path=IsChecked}"/>
+                                <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Center" Text=":" Width="20" Margin="0"/>
+                                <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.Range2_Stake}" Width="30" Margin="0" IsEnabled="{Binding ElementName=EnableRangeStake, Path=IsChecked}"/>
+                                <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Center" Text=" to" Width="30"/>
+                                <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.Range2_StakeTo}" Width="30" Margin="0" IsEnabled="{Binding ElementName=EnableRangeStake, Path=IsChecked}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Height="25">
+                                <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Right" Text="Odd" Margin="0,0,10,0" Width="50"/>
+                                <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.Range3_Start}" Width="30" Margin="0" IsEnabled="{Binding ElementName=EnableRangeStake, Path=IsChecked}"/>
+                                <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Center" Text="-" Width="20" Margin="0"/>
+                                <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.Range3_End}" Width="30" Margin="0" IsEnabled="{Binding ElementName=EnableRangeStake, Path=IsChecked}"/>
+                                <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Center" Text=":" Width="20" Margin="0"/>
+                                <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.Range3_Stake}" Width="30" Margin="0" IsEnabled="{Binding ElementName=EnableRangeStake, Path=IsChecked}"/>
+                                <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Center" Text=" to" Width="30"/>
+                                <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.Range3_StakeTo}" Width="30" Margin="0" IsEnabled="{Binding ElementName=EnableRangeStake, Path=IsChecked}"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Height="40">
+                        <Border BorderBrush="{StaticResource ControlBorder}" BorderThickness="0 0 0 2" />
+                        <TextBlock Style="{StaticResource ContentsTitle}" Text="Dolphin" />
+                    </Grid>
+                    <Grid Height="30">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,-29,0">
+                            <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Right" Text="Api key"/>
+                            <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.DolphinId, Mode=TwoWay}" Height="22" Margin="10,4" Width="333"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Height="30">
+                        <StackPanel Orientation="Horizontal"/>
+                    </Grid>
+                    <Grid Height="100" x:Name="ExtraPanel" Margin="0,10,0,0" Visibility="Visible">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="70"/>
+                            <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="1*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Style="{StaticResource ContentsDescription}" VerticalAlignment="Top" Padding="0,5" TextAlignment="Center" Text="Extra" Grid.Column="0" Height="26" Width="70" FontWeight="Bold"/>
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,5,0,0" Name="Tipster2Panel" Visibility="Visible" Grid.Column="1">
+                            <CheckBox HorizontalAlignment="Left" IsChecked="{Binding SettingViewModel.EnableTipster2}" Width="120" FontWeight="Bold" Height="20" Visibility="Visible" Name="EnableTipster2">Tipster2</CheckBox>
+                            <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" VerticalAlignment="Top" Height="20" Margin="15,0,0,0" Width="164">
+                                <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Right" Text="Stake" Margin="0,2" Padding="0,0,6,0" Width="60"/>
+                                <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.StakePerTipster2}" Margin="0" Width="30" Height="20" IsEnabled="{Binding ElementName=EnableTipster2, Path=IsChecked}"/>
+                                <CheckBox IsChecked="{Binding SettingViewModel.PercentageStakeModeTipster2}" Foreground="Black" VerticalAlignment="Center" Height="20" Visibility="Visible" Margin="10,0,5,0">% Mode</CheckBox>
+                            </StackPanel>
+                            <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" VerticalAlignment="Top" Height="23" Margin="0,0,0,0" Width="200">
+                                <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Right" Text="Odd From" Margin="0,0,5,0" HorizontalAlignment="Right" Width="70"/>
+                                <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.MinOddsTipster2}" Width="30" Margin="0" Height="20" IsEnabled="{Binding ElementName=EnableSoccerLive, Path=IsChecked}"/>
+                                <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Center" Text=" to" Width="30"/>
+                                <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.MaxOddsTipster2}" Width="30" Height="20" IsEnabled="{Binding ElementName=EnableSoccerLive, Path=IsChecked}" Margin="0"/>
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,5,0,0" Name="SoccerLivePanel" Visibility="Visible" Grid.Column="2">
+                            <CheckBox HorizontalAlignment="Left" IsChecked="{Binding SettingViewModel.EnableSoccerLive }" Width="120" FontWeight="Bold" Height="20" Visibility="Visible" Name="EnableSoccerLive">Soccer Live</CheckBox>
+                            <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" VerticalAlignment="Top" Height="20" Margin="15,0,0,0" Width="200">
+                                <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Right" Text="Stake" Margin="0,2" Padding="0,0,6,0" Width="60"/>
+                                <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.StakeSoccerLive}" Margin="0" Width="30" Height="20" IsEnabled="{Binding ElementName=EnableSoccerLive, Path=IsChecked}"/>
+                                <CheckBox IsChecked="{Binding SettingViewModel.PercentageStakeModeSoccerLive}" Foreground="Black" VerticalAlignment="Center" Height="20" Visibility="Visible" Margin="10,0,5,0">% Mode</CheckBox>
+                            </StackPanel>
+                            <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" VerticalAlignment="Top" Height="23" Margin="0,0,0,0" Width="200">
+                                <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Right" Text="Odd From" Margin="0,0,5,0" HorizontalAlignment="Right" Width="70"/>
+                                <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.MinOddsSoccerLive}" Width="30" Margin="0" Height="20" IsEnabled="{Binding ElementName=EnableSoccerLive, Path=IsChecked}"/>
+                                <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Center" Text=" to" Width="30"/>
+                                <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.MaxOddsSoccerLive}" Width="30" Height="20" IsEnabled="{Binding ElementName=EnableSoccerLive, Path=IsChecked}" Margin="0"/>
+
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Visibility="Collapsed" x:Name="HorsePanel">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="0.8*"/>
+                            <ColumnDefinition Width="0.5*"/>
+                            <ColumnDefinition Width="1.2*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,7,0,0" Height="100" Width="146">
+                            <CheckBox IsChecked="{Binding SettingViewModel.EnableHorseRacing}" Foreground="Black" Height="20" FontWeight="Bold">Horse Racing</CheckBox>
+                            <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="15,0,0,0" Width="131">
+                                <CheckBox IsChecked="{Binding SettingViewModel.IgnoreUSARace}" Foreground="Black" Height="20">Ignore USA Race</CheckBox>
+                                <CheckBox IsChecked="{Binding SettingViewModel.IgnoreUKRace}" Foreground="Black" Height="20">Ignore UK Race</CheckBox>
+                                <CheckBox IsChecked="{Binding SettingViewModel.IgnoreAURace}" Foreground="Black" Height="20">Ignore AU Race</CheckBox>
+                            </StackPanel>
+                        </StackPanel>
+                        <Grid Grid.Column="1" Grid.RowSpan="3" Margin="0,25,0,0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Height="20">
+                                <CheckBox IsChecked="{Binding SettingViewModel.EnableEachWay}" Width="45" Foreground="Black" VerticalAlignment="Center" Height="20">E/W</CheckBox>
+                                <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.EachWayOdd}" Margin="0" Width="40" Height="20"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Column="2" Margin="0,30,0,0" Height="40" Width="90">
+                                <CheckBox IsChecked="{Binding SettingViewModel.EnableHorseLessTime}" Foreground="Black" VerticalAlignment="Center" Height="20" Margin="0,0,-16,0">Only Before</CheckBox>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Height="20" Margin="20,0,0,0" Width="73">
+                                    <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.HorseLessTimeMinute}" Margin="0" Width="40" Height="20"/>
+                                    <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Left" Text=" min" Margin="0,2" Width="28"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                        <StackPanel Orientation="Vertical" Grid.Column="2" Margin="0,25,0,0">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Right" Text="Percent  " Width="55"/>
+                                <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.PercentageHorse}" Width="30" Margin="0"/>
+                                <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Center" Text=" to" Width="30" Name="ArbToLabel1"/>
+                                <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.PercentageToHorse}" Width="30" Name="ArbToText1" Margin="0"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Right" Text="Odd  " Width="55"/>
+                                <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.MinOddsHorse}" Width="30" Margin="0"/>
+                                <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Center" Text=" to" Width="30"/>
+                                <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.MaxOddsHorse}" Width="30" Margin="0"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Right" Text="Stake  " Width="55"/>
+                                <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.StakeHorse}" Width="30" Margin="0"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+                <StackPanel Grid.Row="1" Grid.Column="1" Margin="20,0,30,0">
+                    <Grid Height="40">
+                        <Border BorderBrush="{StaticResource ControlBorder}" BorderThickness="0 0 0 2" />
+                        <TextBlock Style="{StaticResource ContentsTitle}" Text="Server" />
+                    </Grid>
+                    <Grid Height="30">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Right" Text="IP" />
+                            <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.SeverIp}"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Height="30">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Right" Text="Port" />
+                            <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.SeverPort}" Width="50"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Height="30">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Right" Text="License" />
+                            <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.LicenseKey}"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Height="40" Name="ProxyLabelGrid" Visibility="Collapsed">
+                        <Border BorderBrush="{StaticResource ControlBorder}" BorderThickness="0 0 0 2" />
+                        <TextBlock Style="{StaticResource ContentsTitle}" Text="Proxy" />
+                    </Grid>
+                    <Grid Height="30" Margin="0,5" Name="ProxyPanelGrid" Visibility="Collapsed">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Right" Text="Country   " />
+                            <ComboBox Name="Country" Width="50" ItemsSource="{Binding SettingViewModel.RegionList}" SelectedItem="{Binding SettingViewModel.ProxyRegion}" IsSynchronizedWithCurrentItem="True"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Height="40" Name="VMLoginProfileLabelGrid" Visibility="Collapsed">
+                        <Border BorderBrush="{StaticResource ControlBorder}" BorderThickness="0 0 0 2" />
+                        <TextBlock Style="{StaticResource ContentsTitle}" Text="VMLogin" />
+                    </Grid>
+                    <Grid Height="30" Name="VMLoginProfilePanel" Visibility="Collapsed">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Right" Text="Profile ID" Width="70"/>
+                            <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.VMLoginProfile}" Width="200"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Height="40" Name="WaitTimeLabelGrid" Visibility="Collapsed">
+                        <Border BorderBrush="{StaticResource ControlBorder}" BorderThickness="0 0 0 2" />
+                        <TextBlock Style="{StaticResource ContentsTitle}" Text="Reqest delay" />
+                    </Grid>
+                    <Grid Height="30" Name="IntervalDelayPanel" Visibility="Collapsed">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Right" Text="Interval time" />
+                            <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.IntervalDelay}" Width="50"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Height="30" Name="RequestDelayPanel" Visibility="Collapsed">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Right" Text="Request delay" />
+                            <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.RequestDelay}" Width="50"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Height="40" Name="OtherOptionsGrid" Visibility="Visible">
+                        <Border BorderBrush="{StaticResource ControlBorder}" BorderThickness="0 0 0 2" />
+                        <TextBlock Style="{StaticResource ContentsTitle}" Text="Other Options" />
+                    </Grid>
+                    <Grid Height="25" Margin="0,5,0,0">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,0">
+                            <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Right" Text=" Max bets in event" Width="130"/>
+                            <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.MaxEventCount}" Width="40" Height="20"/>
+                            <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Left" Text="(2 - 30)" Margin="5,5,0,0" Width="100" Foreground="Gray"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Height="25" Margin="0,5,0,0">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,0">
+                            <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Right" Text=" Fail bet Retry count" Width="130"/>
+                            <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.FailRetryCount}" Width="40" Height="20"/>
+                            <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Left" Text="(0-10)" Margin="5,5,0,0" Width="100" Foreground="Gray"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid Height="25" Margin="0,5,0,0">
+                        <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                            <CheckBox IsChecked="{Binding SettingViewModel.EnableAllowOddDrop}" Foreground="Black" Height="20" Name="AllowOddDropTo">Allow Odd drop up to</CheckBox>
+                            <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.AllowOddDropPercent}" Width="50" IsEnabled="{Binding ElementName=AllowOddDropTo, Path=IsChecked}"/>
+                            <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Right" Text="%" Width="20"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Height="25" Margin="0,5,0,0">
+                        <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                            <CheckBox IsChecked="{Binding SettingViewModel.EnableAllowOddRise}" Foreground="Black" Height="20" Name="AllowOddRiseTo">Allow Odd rise up to</CheckBox>
+                            <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.AllowOddRisePercent}" Width="50" IsEnabled="{Binding ElementName=AllowOddRiseTo, Path=IsChecked}"/>
+                            <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Right" Text="%" Width="20"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Height="25" Margin="0,5,0,0" Name="EnableMajorLeaguesOnlyPanel">
+                        <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                            <CheckBox IsChecked="{Binding SettingViewModel.EnableMajorLeaguesOnly}" Foreground="Black" Height="20">Allow Only major leagues</CheckBox>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Height="25" Margin="0,5,0,0" Name="EnableDailyBetCountLimitPanel">
+                        <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                            <CheckBox IsChecked="{Binding SettingViewModel.EnableDailyBetCountLimit}" Foreground="Black" Height="20" Name="LimitDailybetCount">Limit Daily bet counts</CheckBox>
+                            <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.DailyBetCountLimit}" Width="50" IsEnabled="{Binding ElementName=LimitDailybetCount, Path=IsChecked}"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Height="25" Margin="0,5,0,0" Name="PlaceDoubleValuesPanel">
+                        <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                            <CheckBox IsChecked="{Binding SettingViewModel.PlaceDoubleValues}" Foreground="Black" Height="20" Name="PlaceDoubleValues">Place bets in double mode</CheckBox>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Height="25" Margin="0,5,0,0" Name="PlaceFastModePanel">
+                        <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                            <CheckBox IsChecked="{Binding SettingViewModel.PlaceFastMode}" Foreground="Black" Height="20" Name="PlaceFastMode">Place bets in fast mode</CheckBox>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Height="25" Margin="0,5,0,0" Name="SoccerEnableFirstHalfPanel">
+                        <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                            <CheckBox IsChecked="{Binding SettingViewModel.SoccerEnableFirstHalfbets}" Foreground="Black" Height="20">Only 1st Half bets in Soccer</CheckBox>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Height="25" Margin="0,5,0,0" Name="SoccerEnableSecondHalfPanel">
+                        <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                            <CheckBox IsChecked="{Binding SettingViewModel.SoccerEnableSecondHalfbets}" Foreground="Black" Height="20">Only 2nd Half bets in Soccer</CheckBox>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Height="25" Margin="0,5,0,0" Name="EnableSuperbetMaxAllow">
+                        <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                            <CheckBox IsChecked="{Binding SettingViewModel.MaxbetEnableSuperbet}" Foreground="Black" Height="20" Name="EnableMaxSuperbet">Enable Max Stake that you can place</CheckBox>
+                            <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.MaxSuperbetlimit}" Width="44" IsEnabled="{Binding ElementName=EnableMaxSuperbet, Path=IsChecked}" Margin="10,1"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Height="25" Margin="0,5,0,0" Name="EnableMaxPendingBetsPanel">
+                        <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                            <CheckBox IsChecked="{Binding SettingViewModel.EnableMaxPendingBets}" Foreground="Black" Height="20" Name="EnableMaxPendingBets">Enable Max Pending bets</CheckBox>
+                            <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.MaxPendingBetsLimit}" Width="50" IsEnabled="{Binding ElementName=EnableMaxPendingBets, Path=IsChecked}"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Height="25" Margin="0,5,0,0">
+                        <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                            <TextBlock Style="{StaticResource ContentsDescription}" VerticalAlignment="Top" Padding="0,5" TextAlignment="Center" Text="Browser" Grid.Column="0" Height="26" Width="70" FontWeight="Bold" Margin="0,0,0,-1"/>
+                            <ComboBox x:Name="chkChrome" Width="72" Foreground="Black" VerticalAlignment="Center" Height="20"  Margin="0,5,0,0" IsSynchronizedWithCurrentItem ="True" SelectedIndex="{Binding SettingViewModel.SelectedBrowser}">
+                                <ComboBoxItem>Chrome</ComboBoxItem>
+                                <ComboBoxItem>3rd</ComboBoxItem>
+                            </ComboBox>
+                            <TextBlock Style="{StaticResource ContentsDescription}" VerticalAlignment="Top" Padding="0,5" TextAlignment="Center" Text="Profile ID" Height="26" Width="65"  Margin="0,0,0,-1"/>
+                            <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.ProfileId}" Width="53" Margin="10,1"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Height="35">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="55*"/>
+                            <ColumnDefinition Width="151*"/>
+                            <ColumnDefinition Width="86*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border BorderBrush="{StaticResource ControlBorder}" BorderThickness="0 0 0 2" Grid.ColumnSpan="3" />
+                        <TextBlock Style="{StaticResource ContentsTitle}" Text="Rest Time" Grid.ColumnSpan="2" Margin="0,9" />
+                    </Grid>
+                    <Grid Height="25" Margin="0,5">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Right" Text="From     " Width="70"/>
+                            <ComboBox Name="StartHour" Width="50" ItemsSource="{Binding SettingViewModel.HourList}" SelectedItem="{Binding SettingViewModel.StartHour}" IsSynchronizedWithCurrentItem="True"/>
+                            <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Center" Text="  To  " Width="50"/>
+                            <ComboBox Name="EndHour" Width="50" ItemsSource="{Binding SettingViewModel.HourList1}" SelectedItem="{Binding SettingViewModel.EndHour}" IsSynchronizedWithCurrentItem="True"/>
+                        </StackPanel>
+                    </Grid>
+
+                </StackPanel>
+
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>

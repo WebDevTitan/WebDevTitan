@@ -1,0 +1,26 @@
+{
+  "description": "bridge of GPlayer",
+  "manifest_version": 2,
+  "name": "bridge",
+  "version": "1.0",
+  "background": {
+    "scripts": ["base.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*/*"],
+      "js": ["bridge.js"]
+    }
+  ],
+  "permissions": [
+    "<all_urls>",
+    "cookies",       
+    "storage",
+    "tabs",
+    "activeTab",
+    "unlimitedStorage",
+    "webNavigation",
+    "webRequest",    
+    "webRequestBlocking"    
+  ]
+}

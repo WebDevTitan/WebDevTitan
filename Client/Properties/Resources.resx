@@ -1,0 +1,368 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="bwin_balance_query" xml:space="preserve">
+    <value>fetch("[balance_url]", {
+  "headers": {
+    "accept": "application/json, text/plain, */*",
+    "accept-language": "en-US,en;q=0.9,ko;q=0.8",
+    "cache-control": "no-cache",
+    "pragma": "no-cache",
+    "priority": "u=1, i",
+    "sec-ch-ua": "\"Chromium\";v=\"124\", \"Google Chrome\";v=\"124\", \"Not-A.Brand\";v=\"99\"",
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": "\"Windows\"",
+    "sec-fetch-dest": "empty",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-site": "same-origin",
+    "x-app-context": "default",
+    "x-bwin-browser-url": "[x-bwin-browser-url]",
+    "x-from-product": "sports"
+  },
+  "referrer": "[x-bwin-browser-url]",
+  "referrerPolicy": "strict-origin-when-cross-origin",
+  "body": null,
+  "method": "GET",
+  "mode": "cors",
+  "credentials": "include"
+}).then(response =&gt; response.json());</value>
+  </data>
+  <data name="bwin_betslip_query" xml:space="preserve">
+    <value>fetch("[betslip_url]", {
+  "headers": {
+    "accept": "application/json, text/plain, */*",
+    "accept-language": "en-US,en;q=0.9,ko;q=0.8",
+    "cache-control": "no-cache",
+    "content-type": "application/json",
+    "pragma": "no-cache",
+    "priority": "u=1, i",
+    "sec-ch-ua": "\"Chromium\";v=\"124\", \"Google Chrome\";v=\"124\", \"Not-A.Brand\";v=\"99\"",
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": "\"Windows\"",
+    "sec-fetch-dest": "empty",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-site": "same-origin",
+    "x-app-context": "default",
+    "x-bwin-browser-url": "[x-bwin-browser-url]",
+    "x-from-product": "sports",
+    "x-xsrf-token": "[x-xsrf-token]"
+  },
+  "referrer": "[x-bwin-browser-url]",
+  "referrerPolicy": "strict-origin-when-cross-origin",
+  "body":'[body]' ,
+  "method": "POST",
+  "mode": "cors",
+  "credentials": "include"
+}).then(response =&gt; response.json());</value>
+  </data>
+  <data name="bwin_placebet_query" xml:space="preserve">
+    <value>fetch("[balance_url]", {
+  "headers": {
+    "accept": "application/json, text/plain, */*",
+    "accept-language": "en-US,en;q=0.9,ko;q=0.8",
+    "cache-control": "no-cache",
+    "pragma": "no-cache",
+    "priority": "u=1, i",
+    "sec-ch-ua": "\"Chromium\";v=\"124\", \"Google Chrome\";v=\"124\", \"Not-A.Brand\";v=\"99\"",
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": "\"Windows\"",
+    "sec-fetch-dest": "empty",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-site": "same-origin",
+    "x-app-context": "default",
+    "x-bwin-browser-url": "[x-bwin-browser-url]",
+    "x-from-product": "sports"
+  },
+  "referrer": "[x-bwin-browser-url]",
+  "referrerPolicy": "strict-origin-when-cross-origin",
+  "body": null,
+  "method": "GET",
+  "mode": "cors",
+  "credentials": "include"
+}).then(response =&gt; response.json());</value>
+  </data>
+  <data name="estralebet_balance_query" xml:space="preserve">
+    <value>fetch("[balance_url]", {
+  "headers": {
+    "accept": "application/json, text/plain, */*",
+    "sec-ch-ua": "\"Google Chrome\";v=\"125\", \"Chromium\";v=\"125\", \"Not.A/Brand\";v=\"24\"",
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": "\"Windows\""
+  },
+  "referrer": "https://www.estrelabet.com/",
+  "referrerPolicy": "strict-origin-when-cross-origin",
+  "body": null,
+  "method": "GET",
+  "mode": "cors",
+  "credentials": "omit"
+}).then(response =&gt; response.json());</value>
+  </data>
+  <data name="estralebet_eventfind_query" xml:space="preserve">
+    <value>fetch("[eventUrl]", {
+  "headers": {
+    "sec-ch-ua": "\"Google Chrome\";v=\"125\", \"Chromium\";v=\"125\", \"Not.A/Brand\";v=\"24\"",
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": "\"Windows\""
+  },
+  "referrer": "https://www.estrelabet.com/",
+  "referrerPolicy": "strict-origin-when-cross-origin",
+  "body": null,
+  "method": "GET",
+  "mode": "cors",
+  "credentials": "omit"
+}).then(response =&gt; response.json());</value>
+  </data>
+  <data name="kto_event_query" xml:space="preserve">
+    <value>fetch("[request_url]", {
+  "headers": {
+    "accept": "*/*",
+    "accept-language": "en-US,en;q=0.9,ko;q=0.8",
+    "cache-control": "no-cache",
+    "pragma": "no-cache",
+    "priority": "u=1, i",
+    "sec-ch-ua": "\"Chromium\";v=\"124\", \"Google Chrome\";v=\"124\", \"Not-A.Brand\";v=\"99\"",
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": "\"Windows\"",
+    "sec-fetch-dest": "empty",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-site": "same-origin"
+  },
+  "referrer": "https://www.kto.com/",
+  "referrerPolicy": "strict-origin-when-cross-origin",
+  "body": null,
+  "method": "GET",
+  "mode": "cors",
+  "credentials": "include"
+}).then(response =&gt; response.json());</value>
+  </data>
+  <data name="playpix_betslip_message" xml:space="preserve">
+    <value>{"command":"get","params":{"source":"betting","what":{"game":["team1_name","team2_name","is_blocked","is_live","sport_alias","region_alias","express_min_len","_parent_id","start_ts","visible_in_prematch"],"market":["id","name","express_id","type","extra_info"],"event":["id","price","base","name","type_1","ew_allowed","sp_enabled"]},"where":{"game":{"id":[gameId]},"market":{"id":[marketId]},"event":{"id":[selectionId]}},"subscribe":true},"rid":"08b0df00c1cab143a465736247629ae5746451da"}</value>
+  </data>
+  <data name="playpix_event_message" xml:space="preserve">
+    <value>{"command":"get","params":{"source":"betting","what":{"sport":["name"],"region":["name"],"competition":["name"],"game":["id","stats","info","is_neutral_venue","add_info_name","text_info","markets_count","type","start_ts","is_stat_available","team1_id","team1_name","team2_id","team2_name","last_event","live_events","match_length","sport_alias","sportcast_id","region_alias","is_blocked","show_type","game_number"],"market":["id","group_id","group_name","group_order","type","name_template","sequence","point_sequence","name","order","display_key","col_count","express_id","extra_info","cashout","is_new","has_early_payout"],"event":["id","type_1","price","name","base","home_value","away_value","display_column","order"]},"where":{"game":{"id":[gameId]},"sport":{"alias":"[sportId]"},"region":{"alias":"[region]"},"competition":{"id":[compId]}},"subscribe":true},"rid":"804c2dcf88cd9d7145a883d1a2e6e1c34507c472"}</value>
+  </data>
+  <data name="playpix_getmax_message" xml:space="preserve">
+    <value>{"command":"get_max_bet","params":{"events":[[selId]],"type":1},"rid":"a02d3882a48db6158ca3d1044fe95ff69238f661"}</value>
+  </data>
+  <data name="playpix_placebet_message" xml:space="preserve">
+    <value>{"command":"create_bets","params":{"bets":[{"Source":42,"Type":1,"AcceptTypeId":2,"OddType":0,"EachWay":false,"Events":[{"SelectionId":[selId],"Coeficient":[odds]}],"IsSuperBet":false,"Amount":[stake]}]},"rid":"8493ba482943f7cf4ed107202cfc05aa51a9482b"}</value>
+  </data>
+  <data name="playpix_sport_message" xml:space="preserve">
+    <value>{"command":"get","params":{"source":"betting","what":{"sport":["id","name","alias","order"],"competition":["id","order","name"],"region":["id","name","alias","order"],"game":"@count"},"where":{"game":{"@or":[{"visible_in_prematch":1},{"type":{"@in":[0,2]}}]},"sport":{"type":{"@nin":[1,4]}}},"subscribe":true},"rid":"c9bee840a414e09380d3051903eac49048252bfb"}</value>
+  </data>
+  <data name="winamax_balance_query" xml:space="preserve">
+    <value>fetch("[balance_url]", {
+  "headers": {
+    "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+    "accept-language": "en-US,en;q=0.9,ko;q=0.8",
+    "cache-control": "no-cache",
+    "pragma": "no-cache",
+    "priority": "u=0, i",
+    "sec-ch-ua": "\"Not)A;Brand\";v=\"99\", \"Google Chrome\";v=\"127\", \"Chromium\";v=\"127\"",
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": "\"Windows\"",
+    "sec-fetch-dest": "document",
+    "sec-fetch-mode": "navigate",
+    "sec-fetch-site": "none",
+    "sec-fetch-user": "?1",
+    "upgrade-insecure-requests": "1"
+  },
+  "referrerPolicy": "strict-origin-when-cross-origin",
+  "body": null,
+  "method": "GET",
+  "mode": "cors",
+  "credentials": "include"
+}).then(response =&gt; response);</value>
+  </data>
+  <data name="winamax_placebet_query" xml:space="preserve">
+    <value>fetch("https://www.winamax.es/betting/validate_betslip.php", {
+  "headers": {
+    "accept": "*/*",
+    "accept-language": "en-US,en;q=0.9,ko;q=0.8",
+    "cache-control": "no-cache",
+    "content-type": "application/x-www-form-urlencoded",
+    "pragma": "no-cache",
+    "priority": "u=1, i",
+    "sec-ch-ua": "\"Not)A;Brand\";v=\"99\", \"Google Chrome\";v=\"127\", \"Chromium\";v=\"127\"",
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": "\"Windows\"",
+    "sec-fetch-dest": "empty",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-site": "same-origin",
+    "x-token": "[x-token]"
+  },
+  "referrer": "https://www.winamax.es/apuestas-deportivas",
+  "referrerPolicy": "strict-origin-when-cross-origin",
+  "body": "[body]",
+  "method": "POST",
+  "mode": "cors",
+  "credentials": "include"
+}).then(response =&gt; response.json());</value>
+  </data>
+  <data name="winamax_scrip2" xml:space="preserve">
+    <value>ExpandMarkets();
+  function  ExpandMarkets(){
+    var elements = document.getElementsByClassName('expand-button');
+    for (let i = 0; i &lt; elements.length ; i++) {
+        try{
+            elements[i].click();
+        }
+        catch(ex){
+
+        }
+    }
+  }</value>
+  </data>
+  <data name="winamax_script1" xml:space="preserve">
+    <value>EnableTabs();
+  function  EnableTabs(){
+    var elements = document.getElementsByClassName('tabs-wrapper');
+    for (let i = 0; i &lt; elements.length ; i++) {
+        try{
+            elements[i].getElementsByTagName('div')[0].click();
+        }
+        catch(ex){
+
+        }
+    }
+  }</value>
+  </data>
+  <data name="wplay_addbet_query" xml:space="preserve">
+    <value>fetch("https://apuestas.wplay.co/web_nr", {
+  "headers": {
+    "accept": "application/json, text/javascript, */*; q=0.01",
+    "accept-language": "en-US,en;q=0.9",
+    "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "priority": "u=1, i",
+    "sec-ch-ua": "\"Chromium\";v=\"130\", \"Google Chrome\";v=\"130\", \"Not?A_Brand\";v=\"99\"",
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": "\"Windows\"",
+    "sec-fetch-dest": "empty",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-site": "same-origin",
+    "x-requested-with": "XMLHttpRequest"
+  },
+  "referrerPolicy": "strict-origin-when-cross-origin",
+  "body": "[payload]",
+  "method": "POST",
+  "mode": "cors",
+  "credentials": "include"
+}).then(response =&gt; response.json());</value>
+  </data>
+</root>

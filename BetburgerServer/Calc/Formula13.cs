@@ -1,0 +1,119 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BetburgerServer.calc
+{
+    public class Formula13 : IFormula
+    {
+        public Calc calc { get; set; }
+        public double revenue_1(double a, double e, double i, double n, double t, double r, double o) {
+            return a * e - o;
+        }
+        public double revenue_2(double a, double e, double i, double n, double t, double r, double o) {
+            return (i + 1) * n / 2 + e - o;
+        }
+        public double revenue_3(double a, double e, double i, double n, double t, double r, double o) {
+            return t * r + i * n - o;
+        }
+        public Calc outcomes_1_2_3(double[] p)
+        {
+            var a = p[0];
+            var e = p[1];
+            var i = p[2];
+            var n = 1 / a + 2 * (a - 1) / (a * (e + 1)) + 1 / i - 2 * e * (a - 1) / (a * i * (e + 1));
+            var t = 1 / (n * a);
+            var r = 2 * (a - 1) / (n * a * (e + 1));
+            var o = (e + 1 + (a - 1) * (1 - e)) / (n * a * (e + 1) * i);
+
+            calc = new Calc(new double[] { t, r, o }, Math.Round(100 * (t * a - 1), 2));
+            return calc;
+        }
+        public Calc outcomes_1(double[] p)
+        {
+            var a = p[0];
+            var e = p[1];
+            var i = p[2];
+            var n = 1 / (e - 1 + (i - 1) * (e - 1) / 2);
+            var t = (e - 1) / (2 * e - 2 + (i - 1) * (e - 1));
+            var r = 1 / (1 + n + t);
+            var o = n / (1 + n + t);
+            var s = t / (1 + n + t);
+
+            calc = new Calc(new double[] { r, o, s }, Math.Round(100 * (a / (1 + n + t) - 1), 2));
+            return calc;
+        }
+        public Calc outcomes_2(double[] p)
+        {
+            var a = p[0];
+            var e = p[1];
+            var i = p[2];
+            var n = (a + i - a * i) / (e - i);
+            var t = a - 1 - n;
+            var r = 1 / (1 + n + t);
+            var o = n / (1 + n + t);
+            var s = t / (1 + n + t);
+
+            calc = new Calc(new double[] { r, o, s }, Math.Round(100 * (((e + 1) * n / 2 + 1) / (1 + n + t) - 1), 2));
+            return calc;
+        }
+        public Calc outcomes_3(double[] p)
+        {
+            var a = p[0];
+            var e = p[1];
+            var i = p[2];
+            var n = 2 * (a - 1) / (e + 1);
+            var t = (e - 1) * (a - 1) / (e + 1);
+            var r = 1 / (1 + n + t);
+            var o = n / (1 + n + t);
+            var s = t / (1 + n + t);
+
+            calc = new Calc(new double[] { r, o, s }, Math.Round(100 * ((e * n + i * t) / (1 + n + t) - 1), 2));
+            return calc;
+        }
+        public Calc outcomes_1_2(double[] p)
+        {
+            var a = p[0];
+            var e = p[1];
+            var i = p[2];
+            var n = 2 * (a - 1) / (e + 1);
+            var t = (e + 1 - 2 * (e - 1) * (a - 1)) / ((i - 1) * (e + 1));
+            var r = 1 / (1 + n + t);
+            var o = n / (1 + n + t);
+            var s = t / (1 + n + t);
+
+            calc = new Calc(new double[] { r, o, s }, Math.Round(100 * (a / (1 + n + t) - 1), 2));
+            return calc;
+        }
+        public Calc outcomes_2_3(double[] p)
+        {
+            var a = p[0];
+            var e = p[1];
+            var i = p[2];
+            var n = (i * (a - 1) - 1) / (i - (e - 1) / 2);
+            var t = (1 - (a - 1) * (e - 1) / 2) / (i - (e - 1) / 2);
+            var r = 1 / (1 + n + t);
+            var o = n / (1 + n + t);
+            var s = t / (1 + n + t);
+
+            calc = new Calc(new double[] { r, o, s }, Math.Round(100 * ((e * n + i * t) / (1 + n + t) - 1), 2));
+            return calc;
+        }
+        public Calc outcomes_1_3(double[] p)
+        {
+            var a = p[0];
+            var e = p[1];
+            var i = p[2];
+            var n = a / (e + i * (e - 1) / 2);
+            var t = a * (e - 1) / (2 * e + i * (e - 1));
+            var r = 1 / (1 + n + t);
+            var o = n / (1 + n + t);
+            var s = t / (1 + n + t);
+
+            calc = new Calc(new double[] { r, o, s }, Math.Round(100 * ((e * n + i * t) / (1 + n + t) - 1), 2));
+            return calc;
+        }
+    }
+}

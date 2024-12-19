@@ -1,0 +1,12 @@
+G:\FreeLancing\Bowling\ChromeDevTools-master\ChromeDevTools-master\source\ChromeDevTools\bin\Debug\MasterDevs.ChromeDevTools.nuspec
+G:\FreeLancing\Bowling\ChromeDevTools-master\ChromeDevTools-master\source\ChromeDevTools\bin\Debug\MasterDevs.ChromeDevTools.dll
+G:\FreeLancing\Bowling\ChromeDevTools-master\ChromeDevTools-master\source\ChromeDevTools\bin\Debug\MasterDevs.ChromeDevTools.pdb
+G:\FreeLancing\Bowling\ChromeDevTools-master\ChromeDevTools-master\source\ChromeDevTools\bin\Debug\Newtonsoft.Json.dll
+G:\FreeLancing\Bowling\ChromeDevTools-master\ChromeDevTools-master\source\ChromeDevTools\bin\Debug\WebSocket4Net.dll
+G:\FreeLancing\Bowling\ChromeDevTools-master\ChromeDevTools-master\source\ChromeDevTools\bin\Debug\Newtonsoft.Json.xml
+G:\FreeLancing\Bowling\ChromeDevTools-master\ChromeDevTools-master\source\ChromeDevTools\obj\Debug\MasterDevs.ChromeDevTools.csproj.CoreCompileInputs.cache
+G:\FreeLancing\Bowling\ChromeDevTools-master\ChromeDevTools-master\source\ChromeDevTools\obj\Debug\MasterDevs.ChromeDevTools.csproj.CopyComplete
+G:\FreeLancing\Bowling\ChromeDevTools-master\ChromeDevTools-master\source\ChromeDevTools\obj\Debug\MasterDevs.ChromeDevTools.dll
+G:\FreeLancing\Bowling\ChromeDevTools-master\ChromeDevTools-master\source\ChromeDevTools\obj\Debug\MasterDevs.ChromeDevTools.pdb
+G:\FreeLancing\Bowling\BetBurger\Project\ChromeDevTools\obj\Debug\MasterDevs.ChromeDevTools.dll
+G:\FreeLancing\Bowling\BetBurger\Project\ChromeDevTools\obj\Debug\MasterDevs.ChromeDevTools.pdb

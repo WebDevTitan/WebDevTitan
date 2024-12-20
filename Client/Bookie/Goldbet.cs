@@ -193,26 +193,46 @@ namespace Project.Bookie
             /// return mouse 
             //Cursor.Position = oldPos;
         }
-        public bool  login()
-        {            
+        public bool login()
+        {
             Global.RemoveCookies();
             Global.SetMonitorVisible(true);
             Global.OpenUrl($"https://{domain}/scommesse/sport/");
-            Thread.Sleep(3000);
+
+            // Wait for the page to fully render by checking for a specific element
+            bool pageLoaded = false;
+            int retryCount = 0;
+            while (!pageLoaded && retryCount < 30)
+            {
+                Thread.Sleep(1000); // Wait for 1 second
+                retryCount++;
+                try
+                {
+                    // Check if a specific element is present on the page
+                    string script = "return document.querySelector('.anonymous--login--button') !== null;";
+                    dynamic result = Global.RunScriptCode(script);
+                    pageLoaded = result == true;
+                }
+                catch
+                {
+                    
+                }
+            }
+
+            if (!pageLoaded)
+            {
+                LogMng.Instance.onWriteStatus("Page load timeout.");
+                return false;
+            }
 
             bool bLogin = false;
             try
             {
-
-                Global.RunScriptCode("document.getElementByClassName('anonymous--login--button').click();");
-
-
-                Thread.Sleep(1000);
-                Global.RunScriptCode("document.getElementById('onetrust-accept-btn-handler').click();");
+                Global.RunScriptCode($"document.getElementById('onetrust-accept-btn-handler').click()");
+                Global.RunScriptCode("document.querySelector('.anonymous--login--button').click();");
 
                 Thread.Sleep(1000);
                 Global.RunScriptCode($"document.getElementById('login_username').value = '{Setting.Instance.username}';");
-
                 Global.RunScriptCode($"document.getElementById('login_password').value = '{Setting.Instance.password}';");
 
                 Thread.Sleep(500);
@@ -220,67 +240,45 @@ namespace Project.Bookie
                 Global.strPlaceBetResult = "";
                 Global.waitResponseEvent.Reset();
 
-                Global.RunScriptCode("document.getElementsByClassName('login__panel--login__form--button--login').click();");
+                Global.RunScriptCode("document.querySelector('.login__panel--login__form--button--login').click();");
                 Thread.Sleep(3000);
 
-                Global.RunScriptCode($"document.getElementsById('mat-input-0').value = '{Setting.Instance.OTP}';");
-
+                //Global.RunScriptCode($"document.getElementById('mat-input-0').value = '{Setting.Instance.OTP}';");
 
                 if (!Global.waitResponseEvent.Wait(10000))
                 {
-                    throw new Exception();
+                    LogMng.Instance.onWriteStatus("Login response timeout.");
+                    throw new Exception("Login response timeout.");
                 }
 
                 dynamic jsonContent = JsonConvert.DeserializeObject<dynamic>(Global.strPlaceBetResult);
 
-
                 if (jsonContent.authenticated.ToString().ToLower() != "true")
                 {
                     LogMng.Instance.onWriteStatus("Login Error: " + jsonContent.authenticated.ToString());
-                    throw new Exception();
+                    throw new Exception("Authentication failed.");
                 }
 
                 Global.strAddBetResult = "";
-//#if (GOLDBET)
-//                int nRetry = 0;
-//                while (Global.bRun)
-//                {
-//                    nRetry++;
-//                    if (nRetry > 600)
-//                    {
-//                        LogMng.Instance.onWriteStatus($"Goldbet 2fa is not verifed");
-//                        return false;
-//                    }
-//                    if (!string.IsNullOrEmpty(Global.strAddBetResult))
-//                    {
-//                        try
-//                        {
-//                            dynamic otpResponse = JsonConvert.DeserializeObject<dynamic>(Global.strAddBetResult);
-
-//                            if (otpResponse.ResultCode.ToString() == "0")
-//                                break;
-//                        }
-//                        catch { }
-//                    }
-//                    Thread.Sleep(500);
-//                }
-//#endif
 
                 Global.OpenUrl($"https://{domain}/scommesse/live");
                 Thread.Sleep(500);
-
 
                 bLogin = true;
             }
             catch (Exception e)
             {
-
+                LogMng.Instance.onWriteStatus($"Exception: {e.Message}");
+                LogMng.Instance.onWriteStatus($"Stack Trace: {e.StackTrace}");
             }
 
             LogMng.Instance.onWriteStatus($"Login Result: {bLogin}");
-            //Global.SetMonitorVisible(false);
             return bLogin;
         }
+
+
+
+
         public string getProxyLocation()
         {
             try
@@ -1309,4 +1307,28 @@ namespace Project.Bookie
     }
 #endif
 }
+//#if (GOLDBET)
+//                int nRetry = 0;
+//                while (Global.bRun)
+//                {
+//                    nRetry++;
+//                    if (nRetry > 600)
+//                    {
+//                        LogMng.Instance.onWriteStatus($"Goldbet 2fa is not verifed");
+//                        return false;
+//                    }
+//                    if (!string.IsNullOrEmpty(Global.strAddBetResult))
+//                    {
+//                        try
+//                        {
+//                            dynamic otpResponse = JsonConvert.DeserializeObject<dynamic>(Global.strAddBetResult);
+
+//                            if (otpResponse.ResultCode.ToString() == "0")
+//                                break;
+//                        }
+//                        catch { }
+//                    }
+//                    Thread.Sleep(500);
+//                }
+//#endif
 

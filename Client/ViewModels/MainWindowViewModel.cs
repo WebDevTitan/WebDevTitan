@@ -2659,15 +2659,14 @@ namespace Project.ViewModels
 
             if (UserMng.GetInstance().connectedServer == null)
                 UserMng.GetInstance().connectedServer = OnConnectedServer;
-            //OnConnectedServer();           
+            OnConnectedServer();           
 
 
             _failedBetburgerInfo.Clear();
 
             threadReconnect = new Thread(new ParameterizedThreadStart( ReconnectThread));
             threadReconnect.IsBackground = true;
-            threadReconnect.Start(0);
-            OnConnectedServer();
+            threadReconnect.Start(0);          
 
         }
 
@@ -3243,12 +3242,16 @@ namespace Project.ViewModels
 
             try
             {
-                user.DisconnectToServer();
+                if (user != null)
+                {
+                    user.DisconnectToServer();
+                }
             }
-            catch ( Exception ex)
+            catch (Exception ex)
             {
                 LogMng.Instance.onWriteStatus($"Exception in stopCommand:{ex.Message}");
             }
+
             user = null;
 
             try

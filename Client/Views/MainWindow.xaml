@@ -425,10 +425,7 @@
                         </StackPanel>
                     </Grid>
                     <Grid Height="30">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Right" Text="OTP" />
-                            <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.UserOtp}"/>
-                        </StackPanel>
+                        <StackPanel Orientation="Horizontal"/>
                     </Grid>
                     <Grid Height="30" Name="DomainPanel">
                         <StackPanel Orientation="Horizontal">

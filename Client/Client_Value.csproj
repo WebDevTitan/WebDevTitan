@@ -433,6 +433,7 @@
     <Compile Include="Bookie\Elysgame.cs" />
     <Compile Include="Bookie\Domusbet.cs" />
     <Compile Include="Bookie\Estrelabet.cs" />
+    <Compile Include="Bookie\Goldbet_CDP.cs" />
     <Compile Include="Bookie\KTO.cs" />
     <Compile Include="Bookie\Playpix_CDP.cs" />
     <Compile Include="Bookie\Seubet.cs" />

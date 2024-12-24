@@ -29,7 +29,7 @@ namespace Project.Server
 
             m_process[(byte)NETMSG_CODE.NETMSG_NSTOKEN] = new ProcessNetPacket(ProcReceiveNsToken);
             m_process[(byte)NETMSG_CODE.NETMSG_BETHEADERS] = new ProcessNetPacket(ProcBetHeaders);
-            //m_process[(byte)NETMSG_CODE.NETMSG_LOGINRESULT] = new ProcessNetPacket(ProcLoginResult);
+            m_process[(byte)NETMSG_CODE.NETMSG_LOGINRESULT] = new ProcessNetPacket(ProcLoginResult);
             //m_process[(byte)NETMSG_CODE.NETMSG_HEARTBEAT] = new ProcessNetPacket(ProcHeartbeat);
         }
 

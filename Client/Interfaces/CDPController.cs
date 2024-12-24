@@ -69,6 +69,7 @@ namespace Project.Interfaces
         public string kambiToken = string.Empty;
 
         public string auth_token = string.Empty;
+       
 
         public bool WaitingForAPI = false;
 
@@ -510,7 +511,48 @@ namespace Project.Interfaces
                                             isLogged = true;
                                             break;
                                         }
+                                    } 
+                                    //Goldbet get Token
+                                    else if (resp_url.ToLower().Contains("api/pam/autologin/loginwithtokenotpdeviceregister"))
+                                    {
+                                        int retryCnt = 3;
+                                        while (retryCnt-- > 0)
+                                        {
+                                            var result = (await _chromeSession.SendAsync(new GetResponseBodyCommand() { RequestId = e.RequestId })).Result;
+                                            if (result == null)
+                                            {
+                                                Thread.Sleep(500);
+                                                continue;
+                                            }
+                                            string responseBody = result.Body;
+
+                                            JObject jResp = JObject.Parse(responseBody);
+                                            auth_token = jResp["AuthToken"].ToString();
+                                            LogMng.Instance.onWriteStatus("Auth Token : " + auth_token);                                            
+                                            break;
+                                        }
                                     }
+                                    ////Goldbet get balance
+                                    else if (resp_url.ToLower().Contains("api/pam/cashier/getbalanceheader"))
+                                    {
+                                        int retryCnt = 3;
+                                        while (retryCnt-- > 0)
+                                        {
+                                            var result = (await _chromeSession.SendAsync(new GetResponseBodyCommand() { RequestId = e.RequestId })).Result;
+                                            if (result == null)
+                                            {
+                                                Thread.Sleep(500);
+                                                continue;
+                                            }
+                                            string responseBody = result.Body;
+
+                                            JObject jResp = JObject.Parse(responseBody);
+                                            balanceRespBody = jResp["Saldo"].ToString();
+                                            isLogged = true;
+                                            break;
+                                        }
+                                    }
+
                                     //Tonybet
                                     else if (resp_url.ToLower().Contains("tonybet") && resp_url.Contains("/api/auth"))
                                     {

@@ -1,13 +1,36 @@
-﻿namespace Project.Bookie
+﻿using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Net.Http;
+using System.Net.WebSockets;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Forms;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Project.Helphers;
+using Project.Interfaces;
+using Project.Models;
+using Protocol;
+using WebSocketSharp;
+using static Project.Interfaces.CDPMouseController;
+using MessageEventArgs = PuppeteerSharp.MessageEventArgs;
+using Point = System.Drawing.Point;
+using WebSocket = WebSocketSharp.WebSocket;
+using WebSocketState = WebSocketSharp.WebSocketState;
+
+namespace Project.Bookie
 {
 #if (PLAYPIX)
     class Playpix_CDP : IBookieController
     {
         
         public HttpClient m_client = null;
-        string domain = "";
+        
         Object lockerObj = new object();
-        private WebSocket _webSocket = null;
+        private WebSocketSharp.WebSocket _webSocket = null;
 
         private string sport_resp = string.Empty;
         private string event_resp = string.Empty;
@@ -84,6 +107,36 @@
             }
             catch { }
         }
+
+        private void Socket_OnMessage(object sender, WebSocketSharp.MessageEventArgs e)
+        {
+            try
+            {
+                string strBody = e.Data.Substring(2);
+                if (strBody.Contains("auth_token") || strBody.Contains("user_id"))
+                {
+                    LogMng.Instance.onWriteStatus("Logged in into Socket!");
+                    isLoggedIn = true;
+                }
+                else if (strBody.Contains("c9bee840a414e09380d3051903eac49048252bfb"))
+                    sport_resp = strBody;
+                else if (strBody.Contains("804c2dcf88cd9d7145a883d1a2e6e1c34507c472"))
+                    event_resp = strBody;
+                else if (strBody.Contains("08b0df00c1cab143a465736247629ae5746451da"))
+                    betslip_resp = strBody;
+                else if (strBody.Contains("a02d3882a48db6158ca3d1044fe95ff69238f661"))
+                    betslip_resp = strBody;
+                else if (strBody.Contains("8493ba482943f7cf4ed107202cfc05aa51a9482b"))
+                    betslip_resp = strBody;
+
+                //LogMng.Instance.onWriteStatus(strBody);
+            }
+            catch (Exception ex)
+            {
+                //m_handlerWriteStatus("Exception in socket message: " + ex.ToString());
+            }
+        }
+
         private void Socket_OnOpen(object sender, EventArgs e)
         {
             LogMng.Instance.onWriteStatus("Socket_OnOpen");
@@ -118,38 +171,7 @@
             }
                 
 
-        }
-        private void Socket_OnMessage(object sender, MessageEventArgs e)
-        {
-
-            try
-            {
-                string strBody = e.Data.ToString().Substring(2);
-                if (strBody.Contains("auth_token") || strBody.Contains("user_id"))
-                {
-                    LogMng.Instance.onWriteStatus("Logged in into Socket!");
-                    isLoggedIn = true;
-                }
-                else if (strBody.Contains("c9bee840a414e09380d3051903eac49048252bfb"))
-                    sport_resp = strBody;
-                else if (strBody.Contains("804c2dcf88cd9d7145a883d1a2e6e1c34507c472"))
-                    event_resp = strBody;
-                else if (strBody.Contains("08b0df00c1cab143a465736247629ae5746451da"))
-                    betslip_resp = strBody;
-                else if (strBody.Contains("a02d3882a48db6158ca3d1044fe95ff69238f661"))
-                    betslip_resp = strBody;
-                else if (strBody.Contains("8493ba482943f7cf4ed107202cfc05aa51a9482b"))
-                    betslip_resp = strBody;
-
-                //LogMng.Instance.onWriteStatus(strBody);
-
-
-            }
-            catch (Exception ex)
-            {
-                //m_handlerWriteStatus("Exception in socket message: " + ex.ToString());
-            }
-        }
+        }       
 
         private void Socket_OnClose(object sender, CloseEventArgs e)
         {
@@ -226,7 +248,7 @@
         }
 
         [DllImport("user32.dll")]
-        static extern bool ClientToScreen(IntPtr hWnd, ref Point lpPoint);
+        static extern bool ClientToScreen(IntPtr hWnd, ref System.Drawing.Point lpPoint);
 
         [DllImport("user32.dll")]
         internal static extern uint SendInput(uint nInputs, [MarshalAs(UnmanagedType.LPArray), In] INPUT[] pInputs, int cbSize);

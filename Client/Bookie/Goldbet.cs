@@ -9,25 +9,31 @@ using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Principal;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.UI.WebControls;
 using System.Windows;
+using System.Windows.Controls.Primitives;
 using System.Windows.Forms;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using PlaywrightSharp;
 using Project.Helphers;
+using Project.Interfaces;
 using Protocol;
+using PuppeteerSharp;
+using Telegram.Bot.Types;
 using WebSocketSharp;
 using static MasterDevs.ChromeDevTools.Protocol.Chrome.ProtocolName;
+using static Project.Interfaces.CDPMouseController;
 
 namespace Project.Bookie
 {
 #if (GOLDBET)
     class GoldbetCtrl : IBookieController
     {
-        string domain = "www.goldbet.it";
-
+        string domain = "";
         public HttpClient m_client = null;
         
         Object lockerObj = new object();
@@ -35,9 +41,15 @@ namespace Project.Bookie
         private string strIdUtente = "";   
         public GoldbetCtrl()
         {
-            
+            domain = "goldbet.it"; 
+            if (!domain.StartsWith("www."))
+                domain = "www." + domain;
             m_client = initHttpClient();
-            Global.SetMonitorVisible(true);
+            Global.placeBetHeaderCollection.Clear();
+            if (CDPController.Instance._browserObj == null)
+                CDPController.Instance.InitializeBrowser($"https://{domain}");
+
+
 #if (LOTTOMATICA)
             domain = "www.lottomatica.it";
 #endif
@@ -195,87 +207,62 @@ namespace Project.Bookie
         }
         public bool login()
         {
-            Global.RemoveCookies();
-            Global.SetMonitorVisible(true);
-            Global.OpenUrl($"https://{domain}/scommesse/sport/");
-
-            // Wait for the page to fully render by checking for a specific element
-            bool pageLoaded = false;
-            int retryCount = 0;
-            while (!pageLoaded && retryCount < 30)
-            {
-                Thread.Sleep(1000); // Wait for 1 second
-                retryCount++;
-                try
-                {
-                    // Check if a specific element is present on the page
-                    string script = "return document.querySelector('.anonymous--login--button') !== null;";
-                    dynamic result = Global.RunScriptCode(script);
-                    pageLoaded = result == true;
-                }
-                catch
-                {
-                    
-                }
-            }
-
-            if (!pageLoaded)
-            {
-                LogMng.Instance.onWriteStatus("Page load timeout.");
-                return false;
-            }
-
-            bool bLogin = false;
+            CDPController.Instance.loginRespBody = "";
+            CDPController.Instance.isLogged = false;
+            bool isLoggedIn = false;
+            long documentId = CDPController.Instance.GetDocumentId().Result;
             try
             {
-                Global.RunScriptCode($"document.getElementById('onetrust-accept-btn-handler').click()");
-                Global.RunScriptCode("document.querySelector('.anonymous--login--button').click();");
 
-                Thread.Sleep(1000);
-                Global.RunScriptCode($"document.getElementById('login_username').value = '{Setting.Instance.username}';");
-                Global.RunScriptCode($"document.getElementById('login_password').value = '{Setting.Instance.password}';");
-
-                Thread.Sleep(500);
-
-                Global.strPlaceBetResult = "";
-                Global.waitResponseEvent.Reset();
-
-                Global.RunScriptCode("document.querySelector('.login__panel--login__form--button--login').click();");
-                Thread.Sleep(3000);
-
-                //Global.RunScriptCode($"document.getElementById('mat-input-0').value = '{Setting.Instance.OTP}';");
-
-                if (!Global.waitResponseEvent.Wait(10000))
+                lock (lockerObj)
                 {
-                    LogMng.Instance.onWriteStatus("Login response timeout.");
-                    throw new Exception("Login response timeout.");
+                    m_client = initHttpClient();
+
+                    CDPController.Instance.NavigateInvoke($"https://{domain}/scommesse/sport");
+                    Thread.Sleep(5000);
+
+                    if (CDPController.Instance.FindElement(documentId, "button[class='anonymous--login--button']").Result)
+                    {
+
+                        bool isFound = CDPController.Instance.FindAndClickElement(documentId, "button[class='anonymous--login--button']").Result;
+                        Thread.Sleep(3000);
+
+                        isFound = CDPController.Instance.FindAndClickElement(documentId, "input[name='login_username']", 3, MoveMethod.SQRT).Result;
+                        Thread.Sleep(1500);
+                        CDPMouseController.Instance.InputText(Setting.Instance.username);
+
+                        isFound = CDPController.Instance.FindAndClickElement(documentId, "input[name='login_password']", 3, MoveMethod.SQRT).Result;
+                        Thread.Sleep(1500);
+                        CDPMouseController.Instance.InputText(Setting.Instance.password);
+
+                        CDPController.Instance.user_id = string.Empty;
+                        isFound = CDPController.Instance.FindAndClickElement(documentId, "button[type='submit']", 1, MoveMethod.SQRT).Result;
+                    }
+
+                    Thread.Sleep(5000);
+                    bool r = CDPController.Instance.FindElement(documentId, "button[class='mat-focus-indicator btn-link mat-raised-button mat-button-base']").Result;
+                    int rCnt = 0;
+                    while (CDPController.Instance.FindElement(documentId, "button[class='anonymous--login--button']").Result || CDPController.Instance.FindElement(documentId, "button[class='mat-focus-indicator btn-link mat-raised-button mat-button-base']").Result)
+                    {
+                        rCnt++;
+                        Thread.Sleep(1000);
+                        if (rCnt > 30)
+                            break;
+                    }
+                    Thread.Sleep(4000);
+                    if (!CDPController.Instance.FindElement(documentId, "button[class='anonymous--login--button']").Result && !CDPController.Instance.FindElement(documentId, "button[class='mat-focus-indicator btn-link mat-raised-button mat-button-base']").Result)
+                        isLoggedIn = true;
+
                 }
-
-                dynamic jsonContent = JsonConvert.DeserializeObject<dynamic>(Global.strPlaceBetResult);
-
-                if (jsonContent.authenticated.ToString().ToLower() != "true")
-                {
-                    LogMng.Instance.onWriteStatus("Login Error: " + jsonContent.authenticated.ToString());
-                    throw new Exception("Authentication failed.");
-                }
-
-                Global.strAddBetResult = "";
-
-                Global.OpenUrl($"https://{domain}/scommesse/live");
-                Thread.Sleep(500);
-
-                bLogin = true;
             }
             catch (Exception e)
             {
-                LogMng.Instance.onWriteStatus($"Exception: {e.Message}");
-                LogMng.Instance.onWriteStatus($"Stack Trace: {e.StackTrace}");
+                LogMng.Instance.onWriteStatus($"login exception {e.StackTrace} {e.Message}");
             }
 
-            LogMng.Instance.onWriteStatus($"Login Result: {bLogin}");
-            return bLogin;
+            LogMng.Instance.onWriteStatus($"Login Result: {isLoggedIn}");
+            return isLoggedIn;
         }
-
 
 
 
@@ -1261,7 +1248,7 @@ namespace Project.Bookie
 
         public double getBalance()
         { 
-            int nRetry = 2;
+            int nRetry = 2;            
             double balance = 0;
             while (nRetry >= 0)
             {
@@ -1269,30 +1256,19 @@ namespace Project.Bookie
                 try
                 {
 
-                    string formDataString = "";
-                    string getBalanceURL = "https://" + domain + "/scommesse/getBalance/";
-//#if (LOTTOMATICA)
-                    formDataString = "page=sport";
-//#endif
+                    //string auth_token = CDPController.Instance.auth_token; 
+                    //string ReqJson = "\"{\\\"IdCanale\\\":13,\\\"IdUtente\\\":5827848,\\\"IpUtente\\\":null,\\\"idCanale\\\":13,\\\"CodiceTransazione\\\":\\\"221d7e2e-64fb-4516-9548-84161a510966\\\",\\\"vertical\\\":1}\"";                   
+                    //string X = "\"x-acceptconsent\": \"true\",\r\n    \"x-auth-iduser\": \"5827848\",\r\n    \"x-auth-token\": \"" + auth_token + "\",\r\n    \"x-auth-username\": \"silvilore\",\r\n    \"x-brand\": \"1\",\r\n    \"x-idcanale\": \"13\"";
+                    //X = X.Replace("\r\n", "");
+                    //string javaCode = "\"priority\": \"u=1, i\",\r\n    \"sec-ch-ua\": \"\\\"Google Chrome\\\";v=\\\"131\\\", \\\"Chromium\\\";v=\\\"131\\\", \\\"Not_A Brand\\\";v=\\\"24\\\"\",\r\n    \"sec-ch-ua-mobile\": \"?0\",\r\n    \"sec-ch-ua-platform\": \"\\\"Windows\\\"\",\r\n    \"sec-fetch-dest\": \"empty\",\r\n    \"sec-fetch-mode\": \"cors\",\r\n    \"sec-fetch-site\": \"same-origin\"";
+                    //javaCode = javaCode.Replace("\"", "'").Replace("\r\n", "");
+                    //string getBalanceURL = "https://" + domain + "/api/pam/cashier/getbalanceheader";
+                    //string functionString = $"window.fetch('{getBalanceURL}', {{ \"headers\": {{ \"accept\": 'application/json, text/plain, */*', 'accept-language': 'en-US,en;q=0.9', 'content-type':'application/json', {javaCode}, {X}}}, \"referrer\":'https://www.goldbet.it/scommesse/sport/', \"referrerPolicy\": 'strict-origin-when-cross-origin', \"body\": {ReqJson}, \"method\": 'POST', \"mode\": 'cors', \"credentials\": 'include'}}).then(response => response.json());";
+                    //functionString = functionString.Replace("'", "\"");
 
-                    string functionString = $"window.fetch('{getBalanceURL}', {{ headers: {{ accept: 'application/json', 'accept-language': 'en-US,en;q=0.9', 'content-type': 'application/x-www-form-urlencoded' }}, TE: 'trailers', 'X-Requested-With': 'XMLHttpRequest', body: '{formDataString}', method: 'POST' }}).then(response => response.json());";
-
-                    Global.strAddBetResult = "";
-                    Global.waitResponseEvent.Reset();
-
-                    Global.RunScriptCode(functionString);
-
-                    if (!Global.waitResponseEvent.Wait(3000))
-                    {
-                        continue;
-                    }
-                    LogMng.Instance.onWriteStatus($"getBalance response: {Global.strAddBetResult}");
-                    dynamic jsonContent = JsonConvert.DeserializeObject<dynamic>(Global.strAddBetResult);
-
-                    string RealUserBalance = jsonContent[0].ToString();
-                    balance = Utils.ParseToDouble(RealUserBalance);
-
-                    break;
+                    //string result = CDPController.Instance.ExecuteScript(functionString, true);
+                    //CDPController.Instance.PlaceBetRespBody = "";
+                    balance = Convert.ToDouble(CDPController.Instance.balanceRespBody) / 100;                    
                 }
                 catch (Exception e)
                 {
@@ -1307,28 +1283,4 @@ namespace Project.Bookie
     }
 #endif
 }
-//#if (GOLDBET)
-//                int nRetry = 0;
-//                while (Global.bRun)
-//                {
-//                    nRetry++;
-//                    if (nRetry > 600)
-//                    {
-//                        LogMng.Instance.onWriteStatus($"Goldbet 2fa is not verifed");
-//                        return false;
-//                    }
-//                    if (!string.IsNullOrEmpty(Global.strAddBetResult))
-//                    {
-//                        try
-//                        {
-//                            dynamic otpResponse = JsonConvert.DeserializeObject<dynamic>(Global.strAddBetResult);
-
-//                            if (otpResponse.ResultCode.ToString() == "0")
-//                                break;
-//                        }
-//                        catch { }
-//                    }
-//                    Thread.Sleep(500);
-//                }
-//#endif
 

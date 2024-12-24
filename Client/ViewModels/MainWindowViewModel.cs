@@ -12,6 +12,7 @@ using System.Windows;
 using System.Windows.Input;
 using Gma.System.MouseKeyHook;
 using log4net;
+using MasterDevs.ChromeDevTools.Protocol.Chrome.Schema;
 using Microsoft.Practices.Unity;
 using Newtonsoft.Json;
 using Prism.Commands;
@@ -52,8 +53,9 @@ namespace Project.ViewModels
 
         private UserInfo user;
 
-        public Thread threadReconnect = null;
+        public Thread threadReconnect = null;        
         public Thread threadBet = null;
+        public Thread threadlogin = null;
 
         private object _runthreadLocker = new object();
 
@@ -164,7 +166,7 @@ namespace Project.ViewModels
             }
 #endif
 
-#if (BET365_BM || SNAI || UNIBET || SKYBET || PLANETWIN || GOLDBET || LOTTOMATICA || PINNACLE || STOIXIMAN || BETANO|| BETPREMIUM || _888SPORT || SPORTPESA || REPLATZ || CHANCEBET || DOMUSBET || BETALAND|| BETFAIR_FETCH || BETFAIR || ELYSGAME || EUROBET || FANDUEL || BETMGM || NOVIBET || BETWAY || BETFAIR_NEW || RUSHBET)
+#if (BET365_BM || SNAI || UNIBET || SKYBET || PLANETWIN || LOTTOMATICA || PINNACLE || STOIXIMAN || BETANO|| BETPREMIUM || _888SPORT || SPORTPESA || REPLATZ || CHANCEBET || DOMUSBET || BETALAND|| BETFAIR_FETCH || BETFAIR || ELYSGAME || EUROBET || FANDUEL || BETMGM || NOVIBET || BETWAY || BETFAIR_NEW || RUSHBET)
             popupDialog = new PopupDialog();
             popupDialog.Show();
 
@@ -2658,19 +2660,27 @@ namespace Project.ViewModels
                 UserMng.GetInstance().onArbReceived = ArbReceived;
 
             if (UserMng.GetInstance().connectedServer == null)
-                UserMng.GetInstance().connectedServer = OnConnectedServer;
-            OnConnectedServer();           
-
+                UserMng.GetInstance().connectedServer = OnConnectedServer;                   
 
             _failedBetburgerInfo.Clear();
 
-            threadReconnect = new Thread(new ParameterizedThreadStart( ReconnectThread));
+            threadReconnect = new Thread(new ParameterizedThreadStart(ReconnectThread));
             threadReconnect.IsBackground = true;
-            threadReconnect.Start(0);          
-
+            threadReconnect.Start(0);
+#if (GOLDBET)
+            //threadlogin = new Thread(login);
+            //threadlogin.IsBackground = true;
+            //threadlogin.Start();
+#endif
         }
-
-
+#if (GOLDBET)
+        //private void login()
+        //{
+        //    if (bookieController == null)
+        //        bookieController = new GoldbetCtrl();
+        //    bookieController.login();
+        //}
+#endif
         bool bIsRunningConnectedServer = false;
         public void OnConnectedServer()
         {
@@ -2961,14 +2971,16 @@ namespace Project.ViewModels
 
 #if (TROUBLESHOT)
             string region = bookieController.getProxyLocation();
+            
             LogMng.Instance.onWriteStatus(string.Format("Region of Bot - {0}", region));
 #endif
-            LogMng.Instance.onWriteStatus("Bot Start and login");
+            LogMng.Instance.onWriteStatus("Bot Start and login");                      
 
             bool logResult = bookieController.login();
             if (logResult)
             {
                 Global.balance = bookieController.getBalance();
+                
                 UserMng.GetInstance().SendClientBalance(Global.balance);
 
                 Application.Current.Dispatcher.Invoke(new Action(() =>
@@ -3246,12 +3258,12 @@ namespace Project.ViewModels
                 {
                     user.DisconnectToServer();
                 }
+
             }
-            catch (Exception ex)
+            catch ( Exception ex)
             {
                 LogMng.Instance.onWriteStatus($"Exception in stopCommand:{ex.Message}");
             }
-
             user = null;
 
             try

@@ -53,7 +53,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;SUPERBET, ARB_LIMIT, FIREFOX, VIP, TROUBLESHOT,CHRISTIAN</DefineConstants>
+    <DefineConstants>TRACE;GOLDBET, ARB_LIMIT, FIREFOX, VIP, TROUBLESHOT,CHRISTIAN</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <UseVSHostingProcess>false</UseVSHostingProcess>

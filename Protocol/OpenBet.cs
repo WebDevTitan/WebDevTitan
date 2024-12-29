@@ -2658,6 +2658,18 @@ namespace Protocol
 
         public bool isLive;
     }
+    //public class OpenBet_Goldbet
+    //{
+    //    public string market_mn = "1X2";
+    //    public string market_mi = "1329626039";
+    //    public string market_mti = "10";
+    //    public string market_oc = "10340";
+    //    public string market_sn = "1";
+    //    public string market_si = "-692711197";
+    //    public string market_oi = "29068473198";
+
+    //    public bool isLive = false;
+    //}
     public class OpenBet_Eurobet
     {
         public int marketId;

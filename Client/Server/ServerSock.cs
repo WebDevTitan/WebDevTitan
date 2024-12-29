@@ -275,8 +275,8 @@ namespace Project.Server
             {
                 try
                 {
-                    pointer = 0;
-                    int signature1 = _totalByteBuffer[pointer++];
+                     pointer = 0;
+                     int signature1 = _totalByteBuffer[pointer++];
                     if (signature1 != NetPacket.SIGNATURE1)
                         continue;
 

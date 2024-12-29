@@ -7,18 +7,25 @@ using System.Net;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using System.Web.UI.WebControls;
 using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Forms;
+using Gma.System.MouseKeyHook;
+using MasterDevs.ChromeDevTools.Protocol.Chrome.Emulation;
+using MySqlX.XDevAPI.Common;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PlaywrightSharp;
+using PlaywrightSharp.Har;
 using Project.Helphers;
 using Project.Interfaces;
 using Protocol;
@@ -34,8 +41,7 @@ namespace Project.Bookie
     class GoldbetCtrl : IBookieController
     {
         string domain = "";
-        public HttpClient m_client = null;
-        
+        public HttpClient m_client = null;       
         Object lockerObj = new object();
         //private static ProxyServer _proxyServer = null;
         private string strIdUtente = "";   
@@ -44,239 +50,92 @@ namespace Project.Bookie
             domain = "goldbet.it"; 
             if (!domain.StartsWith("www."))
                 domain = "www." + domain;
-            m_client = initHttpClient();
-            Global.placeBetHeaderCollection.Clear();
+            m_client = initHttpClient();            
             if (CDPController.Instance._browserObj == null)
                 CDPController.Instance.InitializeBrowser($"https://{domain}");
-
+            
 
 #if (LOTTOMATICA)
             domain = "www.lottomatica.it";
 #endif
         }
+             
+        
 
-        public void Close()
-        {
-
-        }
-
-        public void Feature()
-        {
-
-        }
-
-        public int GetPendingbets()
-        {
-            return 0;
-        }
-        public bool logout()
-        {
-            return true;
-        }
-
-        public bool Pulse()
-        {
-            return false;
-            //SetTraceHeaders();
-            //try
-            //{
-            //    lock (lockerObj)
-            //    {
-            //        HttpResponseMessage tokenResponseMessage = m_client.GetAsync("https://" + domain + "/getOverviewLive/?idDiscipline=0&idTab=0&isFromUser=false").Result;
-            //        tokenResponseMessage.EnsureSuccessStatusCode();
-            //    }
-            //}
-            //catch
-            //{ }
-            //int nHostIDCount = 0;
-            //foreach (System.Net.Cookie cookie in Global.cookieContainer.GetCookies(new Uri("https://" + domain)))
-            //{
-            //    if (cookie.Name == "HOSTID")
-            //    {
-            //        nHostIDCount++;
-            //    }
-            //}
-
-            //if (nHostIDCount > 1)
-            //{
-            //    LogMng.Instance.onWriteStatus($"HostID Count: {nHostIDCount} need to relogin");
-            //    return false;
-            //}
-            //return true;
-        }
-      
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto)]
-        private static extern bool PostMessage(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
-        public static extern int SetCursorPos(int x, int y);
-
-        [DllImport("user32.dll")]
-        private static extern bool SetForegroundWindow(IntPtr hWnd);
-        [Flags]
-        public enum MouseEventFlags
-        {
-            LEFTDOWN = 0x00000002,
-            LEFTUP = 0x00000004,
-            MIDDLEDOWN = 0x00000020,
-            MIDDLEUP = 0x00000040,
-            MOVE = 0x00000001,
-            ABSOLUTE = 0x00008000,
-            RIGHTDOWN = 0x00000008,
-            RIGHTUP = 0x00000010
-        }
-        Random rand = new Random();
-        public void MouseMove()
-        {
-            while (true)
-            {
-                SetForegroundWindow(Global.ViewerHwnd);
-
-
-                Thread.Sleep(100);
-
-
-                int x = rand.Next(0, (int)SystemParameters.WorkArea.Width);
-                int y = rand.Next(0, (int)SystemParameters.WorkArea.Height);
-
-                //SetCursorPos(x, y);
-
-                //int lParam = y << 16 | x;
-                //PostMessage(Global.ViewerHwnd, 0x0200, (IntPtr)0, (IntPtr)lParam);  //WM_MOUSEMOVE
-                //PostMessage(Global.ViewerHwnd, 0x0084, (IntPtr)0, (IntPtr)lParam);  //WM_NCHITTEST
-                //PostMessage(Global.ViewerHwnd, 0x0020, (IntPtr)Global.ViewerHwnd, (IntPtr)0x02000001);  //WM_SETCURSOR
-            }
-        }
-
-        [DllImport("user32.dll")]
-        static extern bool ClientToScreen(IntPtr hWnd, ref Point lpPoint);
-
-        [DllImport("user32.dll")]
-        internal static extern uint SendInput(uint nInputs, [MarshalAs(UnmanagedType.LPArray), In] INPUT[] pInputs, int cbSize);
-
-#pragma warning disable 649
-        internal struct INPUT
-        {
-            public UInt32 Type;
-            public MOUSEKEYBDHARDWAREINPUT Data;
-        }
-
-        [StructLayout(LayoutKind.Explicit)]
-        internal struct MOUSEKEYBDHARDWAREINPUT
-        {
-            [FieldOffset(0)]
-            public MOUSEINPUT Mouse;
-        }
-
-        internal struct MOUSEINPUT
-        {
-            public Int32 X;
-            public Int32 Y;
-            public UInt32 MouseData;
-            public UInt32 Flags;
-            public UInt32 Time;
-            public IntPtr ExtraInfo;
-        }
-
-#pragma warning restore 649
-
-        public static void ClickOnPoint(IntPtr wndHandle, Point clientPoint)
-        {
-            var oldPos = Cursor.Position;
-
-            /// get screen coordinates
-            ClientToScreen(wndHandle, ref clientPoint);
-
-            /// set cursor on coords, and press mouse
-            Cursor.Position = new System.Drawing.Point((int)clientPoint.X, (int)clientPoint.Y);
-
-            var inputMouseDown = new INPUT();
-            inputMouseDown.Type = 0; /// input type mouse
-            inputMouseDown.Data.Mouse.Flags = 0x0002; /// left button down
-
-            var inputMouseUp = new INPUT();
-            inputMouseUp.Type = 0; /// input type mouse
-            inputMouseUp.Data.Mouse.Flags = 0x0004; /// left button up
-
-            var inputs = new INPUT[] { inputMouseDown, inputMouseUp };
-            SendInput((uint)inputs.Length, inputs, Marshal.SizeOf(typeof(INPUT)));
-
-            /// return mouse 
-            //Cursor.Position = oldPos;
-        }
         public bool login()
         {
             CDPController.Instance.loginRespBody = "";
             CDPController.Instance.isLogged = false;
-            bool isLoggedIn = false;
-            long documentId = CDPController.Instance.GetDocumentId().Result;
-            try
-            {
+            bool isLoggedIn = true;
+            //long documentId = CDPController.Instance.GetDocumentId().Result;
+            //try
+            //{
 
-                lock (lockerObj)
-                {
-                    m_client = initHttpClient();
+            //    lock (lockerObj)
+            //    {
+            //        m_client = initHttpClient();
 
-                    CDPController.Instance.NavigateInvoke($"https://{domain}/scommesse/sport");
-                    Thread.Sleep(5000);
+            //        CDPController.Instance.NavigateInvoke($"https://{domain}/scommesse/sport");
 
-                    if (CDPController.Instance.FindElement(documentId, "button[class='anonymous--login--button']").Result)
-                    {
+            //        Thread.Sleep(15000);
 
-                        bool isFound = CDPController.Instance.FindAndClickElement(documentId, "button[class='anonymous--login--button']").Result;
-                        Thread.Sleep(3000);
+            //        if (CDPController.Instance.FindElement(documentId, "button[class='anonymous--login--button']").Result)
+            //        {
 
-                        isFound = CDPController.Instance.FindAndClickElement(documentId, "input[name='login_username']", 3, MoveMethod.SQRT).Result;
-                        Thread.Sleep(1500);
-                        CDPMouseController.Instance.InputText(Setting.Instance.username);
+            //            bool isFound = CDPController.Instance.FindAndClickElement(documentId, "button[class='anonymous--login--button']").Result;
+            //            Thread.Sleep(3000);
 
-                        isFound = CDPController.Instance.FindAndClickElement(documentId, "input[name='login_password']", 3, MoveMethod.SQRT).Result;
-                        Thread.Sleep(1500);
-                        CDPMouseController.Instance.InputText(Setting.Instance.password);
+            //            isFound = CDPController.Instance.FindAndClickElement(documentId, "input[name='login_username']", 3, MoveMethod.SQRT).Result;
+            //            Thread.Sleep(1500);
+            //            CDPMouseController.Instance.InputText(Setting.Instance.username);
 
-                        CDPController.Instance.user_id = string.Empty;
-                        isFound = CDPController.Instance.FindAndClickElement(documentId, "button[type='submit']", 1, MoveMethod.SQRT).Result;
-                    }
+            //            isFound = CDPController.Instance.FindAndClickElement(documentId, "input[name='login_password']", 3, MoveMethod.SQRT).Result;
+            //            Thread.Sleep(1500);
+            //            CDPMouseController.Instance.InputText(Setting.Instance.password);
 
-                    Thread.Sleep(5000);
-                    bool r = CDPController.Instance.FindElement(documentId, "button[class='mat-focus-indicator btn-link mat-raised-button mat-button-base']").Result;
-                    int rCnt = 0;
-                    while (CDPController.Instance.FindElement(documentId, "button[class='anonymous--login--button']").Result || CDPController.Instance.FindElement(documentId, "button[class='mat-focus-indicator btn-link mat-raised-button mat-button-base']").Result)
-                    {
-                        rCnt++;
-                        Thread.Sleep(1000);
-                        if (rCnt > 30)
-                            break;
-                    }
-                    Thread.Sleep(4000);
-                    if (!CDPController.Instance.FindElement(documentId, "button[class='anonymous--login--button']").Result && !CDPController.Instance.FindElement(documentId, "button[class='mat-focus-indicator btn-link mat-raised-button mat-button-base']").Result)
-                        isLoggedIn = true;
+            //            CDPController.Instance.user_id = string.Empty;
+            //            isFound = CDPController.Instance.FindAndClickElement(documentId, "button[type='submit']", 1, MoveMethod.SQRT).Result;
 
-                }
-            }
-            catch (Exception e)
-            {
-                LogMng.Instance.onWriteStatus($"login exception {e.StackTrace} {e.Message}");
-            }
 
-            LogMng.Instance.onWriteStatus($"Login Result: {isLoggedIn}");
+            //            Thread.Sleep(5000);
+            //            bool r = CDPController.Instance.FindElement(documentId, "button[class='mat-focus-indicator btn-link mat-raised-button mat-button-base']").Result;
+            //            int rCnt = 0;
+            //            while (CDPController.Instance.FindElement(documentId, "button[class='anonymous--login--button']").Result || CDPController.Instance.FindElement(documentId, "button[class='mat-focus-indicator btn-link mat-raised-button mat-button-base']").Result)
+            //            {
+            //                rCnt++;
+            //                Thread.Sleep(1000);
+            //                if (rCnt > 30)
+            //                    break;
+            //            }
+            //        }
+            //        Thread.Sleep(4000);
+            //        if (!CDPController.Instance.FindElement(documentId, "button[class='anonymous--login--button']").Result && !CDPController.Instance.FindElement(documentId, "button[class='mat-focus-indicator btn-link mat-raised-button mat-button-base']").Result)
+            //            isLoggedIn = true;
+
+            //    }
+            //}
+            //catch (Exception e)
+            //{
+            //    LogMng.Instance.onWriteStatus($"login exception {e.StackTrace} {e.Message}");
+            //}
+
+            LogMng.Instance.onWriteStatus("Login Result: Just to let you know, login is unneed.");
             return isLoggedIn;
         }
-
-
 
         public string getProxyLocation()
         {
             try
             {
-                HttpResponseMessage resp = m_client.GetAsync("http://lumtest.com/myip.json").Result;
+                HttpClient httpClient = new HttpClient();
+                HttpResponseMessage resp= httpClient.GetAsync("http://lumtest.com/myip.json").Result;
                 var strContent = resp.Content.ReadAsStringAsync().Result;
-                var payload = JsonConvert.DeserializeObject<dynamic>(strContent);
-                return payload.ip.ToString() + " - " + payload.country.ToString();
+                dynamic json = JObject.Parse(strContent);                                
+                return json["geo"]["region_name"].ToString() + " - " + json["country"].ToString();
             }
             catch (Exception ex)
             {
+                LogMng.Instance.onWriteStatus($"getProxyLocation exception {ex.StackTrace} {ex.Message}");
             }
             return "UNKNOWN";
         }
@@ -324,598 +183,19 @@ namespace Project.Bookie
             return httpClientEx;
         }
 
-        private string previousLocalEventResult = "";
-
-        string ChangeOddFromEventJsonString(string eventsJson, string oddsId, string oddsValue)
-        {
-            string result = eventsJson;
-            string origOddsId = Utils.Between("\"oddsId\":\"", "\"");
-            string origoddsValue = Utils.Between("\"oddsValue\":\"", "\"");
-
-            if (string.IsNullOrEmpty(origOddsId) || origOddsId.Length > 20)
-                return result;
-            if (string.IsNullOrEmpty(origoddsValue) || origoddsValue.Length > 20)
-                return result;
-
-            result = result.Replace("\"oddsId\":\"" + origOddsId + "\"", "\"oddsId\":\"" + oddsId + "\"");
-            result = result.Replace("\"oddsId\":\"" + origoddsValue + "\"", "\"oddsId\":\"" + oddsValue + "\"");
-            return result;
-        }
-
-        PROCESS_RESULT GetPrematchEventJsonString(BetburgerInfo info, out string selIDs, out string eventsJson, out double curOdds)
-        {
-            selIDs = string.Empty;
-            eventsJson = string.Empty;
-            curOdds = 0;
-
-            Global.strRequestUrl = "https://" + domain + "/scommesse/" + info.siteUrl;
-            
-            Global.strPlaceBetResult = "";
-            Global.waitResponseEvent.Reset();
-
-            Global.OpenUrl(Global.strRequestUrl);
-
-            if (!Global.waitResponseEvent.Wait(3000))
-            {
-                if (string.IsNullOrEmpty(previousLocalEventResult))
-                {
-                    LogMng.Instance.onWriteStatus("GetAllLivesMatches Error");
-                    return PROCESS_RESULT.ERROR;
-                }
-            }
-                        
-            string strEventContent = Utils.Between(Global.strPlaceBetResult, "var CALL_DETAIL_OBJ = '", "'");
-            
-
-#if (TROUBLESHOT)
-            LogMng.Instance.onWriteStatus("event Data Json--");
-            LogMng.Instance.onWriteStatus(strEventContent);
-#endif
-
-
-            OpenBet_Goldbet openbet = Utils.ConvertBetburgerPick2OpenBet_Goldbet(info);
-
-            JObject origObject1 = JObject.Parse(strEventContent);
-
-            bool bFound = false;
-            foreach (JObject origObject2 in origObject1["leo"])
-            {
-                foreach (dynamic origObject3 in origObject2["mmkW"])
-                {
-                    foreach (var origObject4 in origObject3.Value["spd"])
-                    {
-                        foreach (var origObject5 in origObject4.Value["asl"])
-                        {
-                            if (origObject5["oi"].ToString() == openbet.market_oi)
-                            {
-                                string aamsId = origObject2["mi"].ToString();
-                                string catId = origObject2["ci"].ToString();
-                                string disId = origObject2["si"].ToString();
-                                string evnDate = origObject2["ed"].ToString();
-                                string evnDateTs = origObject2["edt"].ToString();
-                                string evtId = origObject2["ei"].ToString();
-                                string evtName = origObject2["en"].ToString();
-                                string hdrType = origObject3.Value["ht"].ToString();
-                                string idSlt = origObject3.Value["sslI"].ToString();
-                                string markId = origObject5["mi"].ToString();
-                                string markMultipla = origObject5["oc"].ToString();
-                                string markName = origObject3.Value["mn"].ToString();
-                                string markTypId = origObject5["mti"].ToString();
-                                string oddsId = origObject5["oi"].ToString();
-                                string oddsValue = origObject5["ov"].ToString().Replace(",", ".");
-                                string onLineCode = origObject2["oc"].ToString();
-                                string selId = origObject5["si"].ToString();
-                                string selName = origObject5["sn"].ToString();
-                                string tId = origObject2["ti"].ToString();
-                                string tName = origObject2["td"].ToString();
-                                string vrt = "false";
-
-                                double NewOdd = Utils.ParseToDouble(oddsValue);
-                                curOdds = NewOdd;
-                                LogMng.Instance.onWriteStatus($"SelNewOdd : {NewOdd}");
-
-                                if (CheckOddDropCancelBet(NewOdd, info))
-                                {
-                                    LogMng.Instance.onWriteStatus(string.Format("Odd is changed from {0} To {1}", info.odds, NewOdd.ToString("N2")));
-                                    return PROCESS_RESULT.MOVED;
-                                }
-
-                                selIDs = selId;
-                                LogMng.Instance.onWriteStatus($"SelId: {selIDs} ready for bet");
-
-                                eventsJson = $"{{\"isLive\":false,\"onLineCode\":\"{onLineCode}\",\"selName\":\"{selName}\",\"selId\":\"{selId}\",\"oddsId\":\"{oddsId}\",\"oddsValue\":\"{oddsValue}\",\"markName\":\"{markName}\",\"markId\":\"{markId}\",\"markTypId\":\"{markTypId}\",\"idSlt\":\"{idSlt}\",\"markMultipla\":\"{markMultipla}\",\"hdrType\":\"{hdrType}\",\"catId\":\"{catId}\",\"disId\":\"{disId}\",\"tId\":\"{tId}\",\"tName\":\"{tName}\",\"evnDateTs\":\"{evnDateTs}\",\"evtId\":\"{evtId}\",\"aamsId\":\"{aamsId}\",\"evtName\":\"{evtName}\",\"evnDate\":\"{evnDate}\",\"vrt\":{vrt}}}";
-
-                                bFound = true;
-                                return PROCESS_RESULT.SUCCESS;
-                            }
-                        }
-                        if (bFound)
-                            break;
-                    }
-                    if (bFound)
-                        break;
-                }
-                if (bFound)
-                    break;
-            }
-
-
-            return PROCESS_RESULT.ERROR;
-        }
-
-        PROCESS_RESULT GetLiveEventJsonString(BetburgerInfo info, out string selIDs, out string eventsJson, out double curOdds)
-        {
-            selIDs = string.Empty;
-            eventsJson = string.Empty;
-            curOdds = 0;
-
-
-            Global.strRequestUrl = "https://" + domain + "/scommesse/getOverviewLive/?idDiscipline=0&idTab=0&menu=menu&isFromUser=false";
-            string baseURL = "https://" + domain;
-            string functionString = $"window.fetch('{Global.strRequestUrl}', {{ method: 'GET', headers: {{ 'accept': '*/*', 'accept-language': 'es,en-US;q=0.9,en;q=0.8,fr;q=0.7', 'content-type': 'application/json', }}, credentials: 'include', referrerPolicy: 'strict-origin-when-cross-origin', referrer: '{baseURL}' }}).then(response => response.json());";
-
-
-            Global.strPlaceBetResult = "";
-            Global.waitResponseEvent.Reset();
-
-            Global.RunScriptCode(functionString);
-
-            if (!Global.waitResponseEvent.Wait(3000))
-            {
-                if (string.IsNullOrEmpty(previousLocalEventResult))
-                {
-                    LogMng.Instance.onWriteStatus("GetAllLivesMatches Error");
-                    return PROCESS_RESULT.ERROR;
-                }
-            }
-
-            var strEventContent = Global.strPlaceBetResult;
-            JObject origObject = JObject.Parse(strEventContent);
-            if (origObject["leo"] == null)
-            {
-                origObject = JObject.Parse(previousLocalEventResult);
-                if (origObject["leo"] == null)
-                {
-                    LogMng.Instance.onWriteStatus("GetAllLivesMatches Error(1)");
-                    return PROCESS_RESULT.ERROR;
-                }
-            }
-            else
-            {
-                previousLocalEventResult = strEventContent;
-            }
-
-            string aamsId = "";
-            string catId = "";
-            string disId = "";
-            string evnDate = "";
-            string evnDateTs = "";
-            string evtId = "";
-            string evtName = "";
-            string hdrType = "";
-            string markId = "";
-            string markName = "";
-            string markTypId = "";
-            string oddsId = "";
-            string oddsValue = "";
-            string onLineCode = "";
-            string prvIdEvt = "";
-            string selId = "";
-            string selName = "";
-            string tId = "";
-            string tName = "";
-            string vrt = "";
-            string sNL = "";
-
-            //LogMng.Instance.onWriteStatus($"Placed bet prepare eventTitle:{info.eventTitle} league:{info.league} odd:{info.odds} stake:{info.stake} mn:{openbet.market_mn} si:{openbet.market_si} mi:{openbet.market_mi}");
-
-            //SetTraceHeaders();
-            
-#if (TROUBLESHOT)
-                    LogMng.Instance.onWriteStatus("all live sports--");
-                    LogMng.Instance.onWriteStatus(strEventContent);
-#endif
-            
-           
-            OpenBet_Goldbet openbet = Utils.ConvertBetburgerPick2OpenBet_Goldbet(info);
-
-            double maxSimilarity = 0;
-            string EventdetailUrl = string.Empty;
-
-            JObject origObject3 = JObject.Parse(strEventContent);
-            foreach (var objEvent in origObject3["leo"])
-            {
-                double similarity = Similarity.GetSimilarityRatio(objEvent["enm"].ToString(), info.eventTitle, out double ratio1, out double ratio2);
-
-                if (similarity > maxSimilarity)
-                {
-                    maxSimilarity = similarity;
-
-                    aamsId = objEvent["aid"].ToString();
-                    catId = objEvent["cid"].ToString();
-                    disId = objEvent["sid"].ToString();
-                    evnDate = objEvent["edt"].ToString();
-                    evnDateTs = objEvent["edts"].ToString();
-                    evtId = objEvent["eid"].ToString();
-                    evtName = objEvent["enm"].ToString();
-                    onLineCode = objEvent["ocd"].ToString();
-                    prvIdEvt = objEvent["eprId"].ToString();
-                    tId = objEvent["tid"].ToString();
-                    tName = objEvent["tdsc"].ToString();
-                    vrt = objEvent["vrt"].ToString().ToLower();
-                    EventdetailUrl = string.Format("https://" + domain + "/scommesse/getDetailsEventLive/{0}/{1}", objEvent["sid"].ToString(), objEvent["eid"].ToString());
-                }
-            }
-
-            if (!string.IsNullOrEmpty(tName))
-            {
-                double similarity1 = Similarity.GetSimilarityRatio(tName, info.league, out double ratio11, out double ratio21);
-                if (similarity1 < 50)
-                {
-                    EventdetailUrl = "";
-                }
-            }
-
-            if (string.IsNullOrEmpty(EventdetailUrl))
-            {
-                LogMng.Instance.onWriteStatus("Didn't find target event");
-                return PROCESS_RESULT.ERROR;                
-            }
-
-            bool bFound = false;
-
-            Global.strRequestUrl = EventdetailUrl;
-            baseURL = "https://" + domain;
-            functionString = $"window.fetch('{Global.strRequestUrl}', {{ method: 'GET', headers: {{ 'accept': '*/*', 'accept-language': 'es,en-US;q=0.9,en;q=0.8,fr;q=0.7', 'content-type': 'application/json', }}, credentials: 'include', referrerPolicy: 'strict-origin-when-cross-origin', referrer: '{baseURL}' }}).then(response => response.json());";
-
-            Global.strPlaceBetResult = "";
-            Global.waitResponseEvent.Reset();
-
-            Global.RunScriptCode(functionString);
-
-            if (!Global.waitResponseEvent.Wait(3000))
-            {
-                LogMng.Instance.onWriteStatus("GetAllLivesMatches Error");
-                return PROCESS_RESULT.ERROR;                
-            }
-
-            string strContent = Global.strPlaceBetResult;
-#if (TROUBLESHOT)
-                    LogMng.Instance.onWriteStatus("target match--");
-                    LogMng.Instance.onWriteStatus(strContent);
-#endif
-            JObject origObject4 = JObject.Parse(strContent);
-            foreach (var objEvent in origObject4["mktWbD"])
-            {
-                JToken matchObj = objEvent.ToObject<JProperty>().Value;
-
-                foreach (var marketEvent in matchObj["ms"])
-                {
-                    JToken marketObj = marketEvent.ToObject<JProperty>().Value;
-                    foreach (var piEvent in marketObj["asl"])
-                    {
-                        if (piEvent["si"].ToString() == openbet.market_si && piEvent["mi"].ToString() == openbet.market_mi)
-                        {
-                            hdrType = matchObj["ht"].ToString();
-                            markId = piEvent["mi"].ToString();
-                            markName = matchObj["mn"].ToString();
-                            markTypId = piEvent["mti"].ToString();
-                            oddsId = piEvent["oi"].ToString();
-                            oddsValue = piEvent["ov"].ToString().Replace(",", ".");
-                            selId = piEvent["si"].ToString();
-                            selName = piEvent["sn"].ToString();
-                            sNL = piEvent["sNL"].ToString();
-                            bFound = true;
-                            break;
-                        }
-                    }
-                    if (bFound)
-                        break;
-                }
-                if (bFound)
-                    break;
-            }
-
-            if (!bFound)
-            {
-                LogMng.Instance.onWriteStatus("Didn't find target market(pi)");
-                return PROCESS_RESULT.SUSPENDED;                
-            }
-
-            double NewOdd = Utils.ParseToDouble(oddsValue);
-            curOdds = NewOdd;
-            LogMng.Instance.onWriteStatus($"SelNewOdd : {NewOdd}");
-
-            if (CheckOddDropCancelBet(NewOdd, info))
-            {                
-                LogMng.Instance.onWriteStatus(string.Format("Odd is changed from {0} To {1}", info.odds, NewOdd.ToString("N2")));
-                return PROCESS_RESULT.MOVED;
-            }
-
-            selIDs = selId;
-            LogMng.Instance.onWriteStatus($"SelId: {selIDs} ready for bet");
-
-            eventsJson = $"{{\"isLive\":\"true\",\"selName\":\"{selName}\",\"selId\":\"{selId}\",\"oddsId\":\"{oddsId}\",\"oddsValue\":\"{oddsValue}\",\"markName\":\"{markName}({sNL})\",\"markId\":\"{markId}\",\"markTypId\":\"{markTypId}\",\"hdrType\":\"{hdrType}\",\"prvIdEvt\":\"{prvIdEvt}\",\"aamsId\":\"{aamsId}\",\"evtName\":\"{evtName}\",\"evnDate\":\"{evnDate}\",\"evnDateTs\":\"{evnDateTs}\",\"evtId\":\"{evtId}\",\"catId\":\"{catId}\",\"disId\":\"{disId}\",\"tId\":\"{tId}\",\"tName\":\"{tName}\",\"onLineCode\":\"{onLineCode}\",\"vrt\":{vrt}}}";
-                
-            return PROCESS_RESULT.SUCCESS;
-        }
-
-        public PROCESS_RESULT PlaceBet(List<BetburgerInfo> infos, out List<PROCESS_RESULT> itrResult)
-        {
-            if (infos.Count < 1)
-            {
-                itrResult = new List<PROCESS_RESULT>();
-                return PROCESS_RESULT.ERROR;
-            }
-
-            string[] selIDs = new string[infos.Count];
-            double[] selOdds = new double[infos.Count];
-            string[] eventsJsonItr = new string[infos.Count];
-
-            itrResult = new List<PROCESS_RESULT>();
-            
-
-            try
-            {
-                lock (lockerObj)
-                {
-                    
-                    double MaxWin = infos[0].stake;
-                    int betCount = 0;
-
-                    for (int i = 0; i < infos.Count; i++)
-                    {
-                        OpenBet_Goldbet openbet = Utils.ConvertBetburgerPick2OpenBet_Goldbet(infos[i]);
-                        if (openbet.isLive)
-                            itrResult.Add(GetLiveEventJsonString(infos[i], out selIDs[i], out eventsJsonItr[i], out selOdds[i]));
-                        else
-                            itrResult.Add(GetPrematchEventJsonString(infos[i], out selIDs[i], out eventsJsonItr[i], out selOdds[i]));
-                    }
-                    
-                    int retryCount = 2;
-
-                    while (--retryCount >= 0)
-                    {
-
-                        string eventsJson = "";
-                        for (int k = 0; k < infos.Count; k++)
-                        {
-                            if (itrResult[k] == PROCESS_RESULT.SUCCESS)
-                            {
-                                if (!string.IsNullOrEmpty(eventsJson))
-                                    eventsJson += ",";
-                                eventsJson += eventsJsonItr[k];
-                                MaxWin *= selOdds[k];
-                                betCount++;
-                            }
-                        }
-
-                        int combType = 1;
-                        if (betCount > 1)
-                            combType = 2;
-
-                        if (betCount <= 0)
-                        {
-                            LogMng.Instance.onWriteStatus("Nothing to Place bet in info list");
-                            return PROCESS_RESULT.ERROR;
-                        }
-
-
-                        string maxPG = MaxWin.ToString("N2").Replace(",", ".");
-
-                        string ReqJson = $"{{\"groupCombs\":{{\"combsInfo\":[{{\"combType\":\"{combType}\",\"combNum\":\"1\",\"stake\":{infos[0].stake}}}],\"sumCombsXType\":1}},\"totalStake\":{infos[0].stake},\"fixed\":[],\"events\":[{eventsJson}],\"creationTime\":{Utils.getTick()},\"virtual\":false,\"allowStakeReduction\":false,\"allowOddChanges\":false,\"bonusWager\":false,\"maxPag\":\"{maxPG}\"}}";
-#if (TROUBLESHOT)
-                    LogMng.Instance.onWriteStatus($"insertBet Req : {ReqJson}");
-#endif
-                        try
-                        {
-                            string betUrl = "https://" + domain + "/scommesse/insertBet";
-
-                            int subRetryCount = 6;
-                            string strBetResp = string.Empty;
-
-                            while (--subRetryCount > 0)
-                            {
-                                try
-                                {
-                                    Global.strRequestUrl = betUrl;
-                                    string functionString = $"window.fetch('{Global.strRequestUrl}', {{ headers: {{ accept: '*/*', 'accept-language': 'es,en-US;q=0.9,en;q=0.8,fr;q=0.7', 'content-type': 'application/json' }}, mode: 'cors', credentials: 'include', referrerPolicy: 'strict-origin-when-cross-origin', body: '{ReqJson}', method: 'POST' }}).then(response => response.json());";
-
-                                    Global.strPlaceBetResult = "";
-                                    Global.waitResponseEvent.Reset();
-
-                                    Global.RunScriptCode(functionString);
-
-
-                                    if (!Global.waitResponseEvent.Wait(20000) || string.IsNullOrEmpty(Global.strPlaceBetResult))
-                                    {
-                                        LogMng.Instance.onWriteStatus("insertBet No Response");
-                                        continue;
-                                    }
-
-                                    strBetResp = Global.strPlaceBetResult;
-
-#if (TROUBLESHOT)
-                                    LogMng.Instance.onWriteStatus("insertBet Res:" + strBetResp);
-#endif
-
-                                    break;
-                                }
-                                catch (Exception ex)
-                                {
-                                    LogMng.Instance.onWriteStatus("insertBet exception:" + ex);
-                                }
-                            }
-                            
-                            dynamic jsonBetResp = JsonConvert.DeserializeObject<dynamic>(strBetResp);
-
-                            if (jsonBetResp.success.ToString() == "True")
-                            {
-#if (TROUBLESHOT)
-                                LogMng.Instance.onWriteStatus(string.Format("Placed bet in Step 1"));
-#endif
-                                string confirmBetUrl = "https://" + domain + "/scommesse/pendingBet/" + jsonBetResp.data.couponCode.ToString();
-                                string strConfirmBetResp = string.Empty;
-                                subRetryCount = 3;
-                                while (--subRetryCount > 0)
-                                {
-                                    try
-                                    {
-                                        Global.strRequestUrl = confirmBetUrl;
-                                        string functionString = $"window.fetch('{Global.strRequestUrl}', {{ headers: {{ accept: '*/*', 'accept-language': 'es,en-US;q=0.9,en;q=0.8,fr;q=0.7', 'content-type': 'application/json' }}, mode: 'cors', credentials: 'include', referrerPolicy: 'strict-origin-when-cross-origin', body: '', method: 'POST' }}).then(response => response.json());";
-
-                                        Global.strPlaceBetResult = "";
-                                        Global.waitResponseEvent.Reset();
-
-                                        Global.RunScriptCode(functionString);
-
-
-                                        if (!Global.waitResponseEvent.Wait(20000) || string.IsNullOrEmpty(Global.strPlaceBetResult))
-                                        {
-                                            continue;
-                                        }
-
-                                        strConfirmBetResp = Global.strPlaceBetResult;
-
-//#if (TROUBLESHOT)
-                                        LogMng.Instance.onWriteStatus("pendingBet Res:" + strConfirmBetResp);
-//#endif
-
-                                        break;
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        LogMng.Instance.onWriteStatus("pendingBet exception:" + ex);
-                                    }
-                                }
-                                dynamic jsonConfirmBetResp = JsonConvert.DeserializeObject<dynamic>(strConfirmBetResp);
-                                LogMng.Instance.onWriteStatus($"Placing failed Reason: {jsonConfirmBetResp.statusDesc}");
-                                if (jsonConfirmBetResp.statusDesc.ToString() == "Placed" || jsonConfirmBetResp.statusDesc.ToString() == "P")
-                                {
-                                    for (int i = 0; i < itrResult.Count; i++)
-                                        itrResult[i] = PROCESS_RESULT.PLACE_SUCCESS;
-                                    return PROCESS_RESULT.PLACE_SUCCESS;
-                                }
-                                //else if (jsonConfirmBetResp.statusDesc.ToString() == "Refused")
-                                //{
-                                //    for (int i = 0; i < itrResult.Count; i++)
-                                //        itrResult[i] = PROCESS_RESULT.CRITICAL_SITUATION;
-                                //    return PROCESS_RESULT.CRITICAL_SITUATION;
-                                //}
-
-
-                                return PROCESS_RESULT.ERROR;
-
-                            }
-                            else if (jsonBetResp.error.error.ToString() == "998")
-                            {
-                                bool bRet = login();
-                                if (!bRet)
-                                {
-                                    LogMng.Instance.onWriteStatus(string.Format("Bet failed(Need relogin)"));
-                                    return PROCESS_RESULT.NO_LOGIN;
-                                }
-                                LogMng.Instance.onWriteStatus(string.Format("Retry after relogin"));
-                            }
-                            else if (jsonBetResp.error.error.ToString() == "3")
-                            {
-                                LogMng.Instance.onWriteStatus(string.Format("Place bet failed code(3). {0} ", jsonBetResp.error.ToString()));
-
-                                try
-                                {
-                                    foreach (var expired in jsonBetResp.error.expiredSelections)
-                                    {                                        
-                                        for (int k = 0; k < infos.Count; k++)
-                                        {
-                                            //LogMng.Instance.onWriteStatus($"checking 3 selections index: {k} SelID: {selIDs[k]} Value: {expired.selectionId.ToString()}");
-
-                                            if (selIDs[k] == expired.selectionId.ToString())
-                                            {
-                                                itrResult[k] = PROCESS_RESULT.SUSPENDED;
-                                                LogMng.Instance.onWriteStatus($"Market is suspended({selIDs[k]})");
-                                                break;
-                                            }
-                                        }
-                                    }
-                                }
-                                catch { }                                
-                            }
-                            else if (jsonBetResp.error.error.ToString() == "4")
-                            {
-                                LogMng.Instance.onWriteStatus(string.Format("Place bet failed code(4). {0} ", jsonBetResp.error.ToString()));
-
-                                try
-                                {
-                                    foreach (var changed in jsonBetResp.error.changedSelections)
-                                    {
-                                        for (int k = 0; k < infos.Count; k++)
-                                        {                                            
-                                            //LogMng.Instance.onWriteStatus($"checking 4 selections index: {k} SelID: {selIDs[k]} Value: {changed.selectionId.ToString()}");
-
-                                            if (selIDs[k] == changed.selectionId.ToString())
-                                            {
-                                                double NewOdd = Utils.ParseToDouble(changed.oddValue.ToString());
-                                                LogMng.Instance.onWriteStatus($"Odd changed in placebet({selIDs[k]}): {infos[k]} -> {NewOdd}");
-                                                selOdds[k] = NewOdd;
-                                                eventsJsonItr[k] = ChangeOddFromEventJsonString(eventsJsonItr[k], changed.oddId.ToString(), changed.oddValue.ToString());
-
-                                                if (CheckOddDropCancelBet(NewOdd, infos[k]))
-                                                {
-                                                    itrResult[k] = PROCESS_RESULT.MOVED;
-                                                    LogMng.Instance.onWriteStatus($"Ignore this bet because of Odd is dropped a lot {selIDs[k]}");                                                    
-                                                }                                                
-                                                break;
-                                            }
-                                        }
-                                    }
-                                }
-                                catch { }                                
-                            }
-                            else
-                            {
-                                LogMng.Instance.onWriteStatus(string.Format("Place bet failed. {0} ", jsonBetResp.error.ToString()));
-
-                                return PROCESS_RESULT.ERROR;
-                            }
-
-                        }
-                        catch (Exception ex)
-                        {
-#if OXYLABS
-                        if (e.Message.Contains("An error occurred while sending the request"))
-                        {
-                            Global.ProxySessionID = new Random().Next().ToString();
-                            m_client = initHttpClient(false);
-                        }
-#endif
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                LogMng.Instance.onWriteStatus($"Place bet exception {ex.StackTrace} {ex.Message}");
-            }
-
-            return PROCESS_RESULT.ERROR;
-        }
-
-        //Not using.
+        private string[] parts;
+        private string authToken = "";
+        private string Idau = "";
+        private string get_Balance = "";
         public PROCESS_RESULT PlaceBet(ref BetburgerInfo info)
         {
             OpenBet_Goldbet openbet = Utils.ConvertBetburgerPick2OpenBet_Goldbet(info);
-
+            
             if (openbet == null)
             {
                 LogMng.Instance.onWriteStatus("Converting OpenBet Error");
                 return PROCESS_RESULT.ERROR;
             }
-
-            int retryCount = 2;
-#if OXYLABS
-            retryCount = 5;
-#endif
-
             try
             {
                 lock (lockerObj)
@@ -926,8 +206,7 @@ namespace Project.Bookie
                     string evnDate = "";
                     string evnDateTs = "";
                     string evtId = "";
-                    string evtName = "";
-                    string hdrType = "";
+                    string evtName = "";                    
                     string markId = "";
                     string markName = "";
                     string markTypId = "";
@@ -941,214 +220,343 @@ namespace Project.Bookie
                     string tName = "";
                     string vrt = "";
                     string sNL = "";
+                    string idSlt = "";                    
+                    double NewOdd = 0;
+                    double curOdds = 0;
+                    string selIDs = "";
+                    string sportName = "";
+                    string categoryDescription = "";
+                    //string userName = Setting.Instance.username;
+                    //string password = Setting.Instance.password;
+                    //string hashedPassword = Hashpassword(password);
+                    //string authTokenAndIdau = GetAuthAndIdUtente(hashedPassword, userName);
+                    //string[] parts = authTokenAndIdau.Split('/');
+                    //string authToken = parts[0];
+                    //string Idau = parts[1];
+                    //string get_Balance = parts[2];
 
-                    //LogMng.Instance.onWriteStatus($"Placed bet prepare eventTitle:{info.eventTitle} league:{info.league} odd:{info.odds} stake:{info.stake} mn:{openbet.market_mn} si:{openbet.market_si} mi:{openbet.market_mi}");
 
-                    //SetTraceHeaders();
-                    Global.strRequestUrl = "https://" + domain + "/scommesse/getOverviewLive/?idDiscipline=0&idTab=0&menu=menu&isFromUser=false";
-                    string baseURL = "https://" + domain;
-                    string functionString = $"window.fetch('{Global.strRequestUrl}', {{ method: 'GET', headers: {{ 'accept': '*/*', 'accept-language': 'es,en-US;q=0.9,en;q=0.8,fr;q=0.7', 'content-type': 'application/json', }}, credentials: 'include', referrerPolicy: 'strict-origin-when-cross-origin', referrer: '{baseURL}' }}).then(response => response.json());";
 
-                    
-                    Global.strPlaceBetResult = "";
-                    Global.waitResponseEvent.Reset();
 
-                    Global.RunScriptCode(functionString);
-
-                    if (!Global.waitResponseEvent.Wait(3000))
+                    if (info.isLive)
                     {
-                        LogMng.Instance.onWriteStatus("GetAllLivesMatches Error");
-                        return PROCESS_RESULT.ERROR;
-                    }
-                    var strContent = Global.strPlaceBetResult;
-                    //LogMng.Instance.onWriteStatus("all live sports--");
-                    //LogMng.Instance.onWriteStatus(strContent);
-                    JObject origObject1 = JObject.Parse(strContent);
-                    double maxSimilarity = 0;
-                    string EventdetailUrl = string.Empty;
-                    
-                    foreach (var objEvent in origObject1["leo"])
-                    {                        
-                        double similarity = Similarity.GetSimilarityRatio(objEvent["enm"].ToString(), info.eventTitle, out double ratio1, out double ratio2);
 
-                        if (similarity > maxSimilarity)
-                        {
-                            maxSimilarity = similarity;
 
-                            aamsId = objEvent["aid"].ToString();
-                            catId = objEvent["cid"].ToString();
-                            disId = objEvent["sid"].ToString();
-                            evnDate = objEvent["edt"].ToString();
-                            evnDateTs = objEvent["edts"].ToString();
-                            evtId = objEvent["eid"].ToString();
-                            evtName = objEvent["enm"].ToString();
-                            onLineCode = objEvent["ocd"].ToString();
-                            prvIdEvt = objEvent["eprId"].ToString();
-                            tId = objEvent["tid"].ToString();
-                            tName = objEvent["tdsc"].ToString();
-                            vrt = objEvent["vrt"].ToString().ToLower();
-                            EventdetailUrl = string.Format("https://" + domain + "/scommesse/getDetailsEventLive/{0}/{1}", objEvent["sid"].ToString(), objEvent["eid"].ToString());                            
-                        }
-                    }
-
-                    if (!string.IsNullOrEmpty(tName))
-                    {
-                        double similarity1 = Similarity.GetSimilarityRatio(tName, info.league, out double ratio11, out double ratio21);
-                        if (similarity1 < 50)
-                        {
-                            EventdetailUrl = "";
-                        }
-                    }
-
-                    if (string.IsNullOrEmpty(EventdetailUrl))
-                    {
-                        LogMng.Instance.onWriteStatus("Didn't find target event");
-                        return PROCESS_RESULT.ERROR;
-                    }
-
-                    bool bFound = false;
-
-                    Global.strRequestUrl = EventdetailUrl;
-                    functionString = $"window.fetch('{Global.strRequestUrl}', {{ method: 'GET', headers: {{ 'accept': '*/*', 'accept-language': 'es,en-US;q=0.9,en;q=0.8,fr;q=0.7', 'content-type': 'application/json', }}, credentials: 'include', referrerPolicy: 'strict-origin-when-cross-origin', referrer: '{baseURL}' }}).then(response => response.json());";
-
-                    Global.strPlaceBetResult = "";
-                    Global.waitResponseEvent.Reset();
-
-                    Global.RunScriptCode(functionString);
-
-                    if (!Global.waitResponseEvent.Wait(3000))
-                    {
-                        LogMng.Instance.onWriteStatus("GetAllLivesMatches Error");
-                        return PROCESS_RESULT.ERROR;
-                    }
-                                        
-                    strContent = Global.strPlaceBetResult;
-                    //LogMng.Instance.onWriteStatus("target match--");
-                    //LogMng.Instance.onWriteStatus(strContent);
-                    JObject origObject2 = JObject.Parse(strContent);
-                    foreach (var objEvent in origObject2["mktWbD"])
-                    {
-                        JToken matchObj = objEvent.ToObject<JProperty>().Value;
-
-                        foreach (var marketEvent in matchObj["ms"])
-                        {
-                            JToken marketObj = marketEvent.ToObject<JProperty>().Value;
-                            foreach (var piEvent in marketObj["asl"])
-                            {
-                                if (piEvent["si"].ToString() == openbet.market_si && piEvent["mi"].ToString() == openbet.market_mi)
-                                {
-                                    hdrType = matchObj["ht"].ToString();
-                                    markId = piEvent["mi"].ToString();
-                                    markName = matchObj["mn"].ToString();
-                                    markTypId = piEvent["mti"].ToString();
-                                    oddsId = piEvent["oi"].ToString();
-                                    oddsValue = piEvent["ov"].ToString().Replace(",", ".");
-                                    selId = piEvent["si"].ToString();
-                                    selName = piEvent["sn"].ToString();
-                                    sNL = piEvent["sNL"].ToString();
-                                    bFound = true;
-                                    break;
-                                }
-                            }
-                            if (bFound)
-                                break;
-                        }
-                        if (bFound)
-                            break;
-                    }
-
-                    if (!bFound)
-                    {
-                        LogMng.Instance.onWriteStatus("Didn't find target market(pi)");
-                        return PROCESS_RESULT.ERROR;
-                    }
-
-                    double NewOdd = Utils.ParseToDouble(oddsValue);
-                    LogMng.Instance.onWriteStatus($"NewOdd : {NewOdd}");
-                    if (CheckOddDropCancelBet(NewOdd, info))
-                    {
-                        LogMng.Instance.onWriteStatus(string.Format("Odd is changed from {0} To {1}", info.odds, NewOdd.ToString("N2")));
-                        return PROCESS_RESULT.MOVED;
-                    }
-
-                    double MaxWin = info.stake * NewOdd;
-                    string maxPG = MaxWin.ToString().Replace(",", ".");
-                    //string ReqJson = $"{{\"single_stake\":{{\"combsInfo\":[{{\"combType\":\"1\",\"combNum\":\"1\",\"stake\":{info.stake}}}],\"sumCombsXType\":1}},\"total_stake\":{info.stake},\"fixed\":[],\"events\":[{{\"isLive\":\"true\",\"selName\":\"{selName}\",\"selId\":\"{selId}\",\"oddsId\":\"{oddsId}\",\"oddsValue\":\"{oddsValue}\",\"markName\":\"{markName}({sNL})\",\"markId\":\"{markId}\",\"markTypId\":\"{markTypId}\",\"hdrType\":\"{hdrType}\",\"prvIdEvt\":\"{prvIdEvt}\",\"aamsId\":\"{aamsId}\",\"evtName\":\"{evtName}\",\"evnDate\":\"{evnDate}\",\"evnDateTs\":\"{evnDateTs}\",\"evtId\":\"{evtId}\",\"catId\":\"{catId}\",\"disId\":\"{disId}\",\"tId\":\"{tId}\",\"tName\":\"{tName}\",\"onLineCode\":\"{onLineCode}\",\"vrt\":{vrt}}}],\"creationTime\":{Utils.getTick()},\"virtual\":false,\"allowStakeReduction\":false,\"allowOddChanges\":false}}";
-                    string ReqJson = $"{{\"groupCombs\":{{\"combsInfo\":[{{\"combType\":\"1\",\"combNum\":\"1\",\"stake\":{info.stake}}}],\"sumCombsXType\":1}},\"totalStake\":{info.stake},\"fixed\":[],\"events\":[{{\"isLive\":\"true\",\"selName\":\"{selName}\",\"selId\":\"{selId}\",\"oddsId\":\"{oddsId}\",\"oddsValue\":\"{oddsValue}\",\"markName\":\"{markName}({sNL})\",\"markId\":\"{markId}\",\"markTypId\":\"{markTypId}\",\"hdrType\":\"{hdrType}\",\"prvIdEvt\":\"{prvIdEvt}\",\"aamsId\":\"{aamsId}\",\"evtName\":\"{evtName}\",\"evnDate\":\"{evnDate}\",\"evnDateTs\":\"{evnDateTs}\",\"evtId\":\"{evtId}\",\"catId\":\"{catId}\",\"disId\":\"{disId}\",\"tId\":\"{tId}\",\"tName\":\"{tName}\",\"onLineCode\":\"{onLineCode}\",\"vrt\":{vrt}}}],\"creationTime\":{Utils.getTick()},\"virtual\":false,\"allowStakeReduction\":false,\"allowOddChanges\":false,\"bonusWager\":false,\"maxPag\":\"{maxPG}\"}}";
-#if (TROUBLESHOT)
-                    LogMng.Instance.onWriteStatus($"insertBet Req : {ReqJson}");
-#endif
-                    while (--retryCount >= 0)
-                    {
                         try
                         {
-                            string betUrl = "https://" + domain + "/scommesse/insertBet";
-
-                            int subRetryCount = 6;
-                            string strBetResp = string.Empty;
-
-                            while (--subRetryCount > 0)
+                            string getLiveOddURL = "https://" + domain + "/scommesse/getOverviewLive/?idDiscipline=0&idTab=0&menu=menu&isFromUser=false";
+                            JObject getLiveOddsJOB = new JObject
                             {
-                                try
+                                ["headers"] = new JObject
                                 {
-                                    Global.strRequestUrl = betUrl;
-                                    functionString = $"window.fetch('{Global.strRequestUrl}', {{ headers: {{ accept: '*/*', 'accept-language': 'es,en-US;q=0.9,en;q=0.8,fr;q=0.7', 'content-type': 'application/json' }}, mode: 'cors', credentials: 'include', referrerPolicy: 'strict-origin-when-cross-origin', body: '{ReqJson}', method: 'POST' }}).then(response => response.json());";
+                                    ["accept"] = "application/json, text/plain, */*",
+                                    ["accept-language"] = "en-US,en;q=0.9",
+                                    ["content-type"] = "application/json",
+                                    ["priority"] = "u=1, i",
+                                    ["sec-ch-ua"] = "\"Google Chrome\";v=\"131\", \"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\"",
+                                    ["sec-ch-ua-mobile"] = "?0",
+                                    ["sec-ch-ua-platform"] = "\"Windows\"",
+                                    ["sec-fetch-dest"] = "empty",
+                                    ["sec-fetch-mode"] = "cors",
+                                    ["sec-fetch-site"] = "same-origin",
+                                    ["x-acceptconsent"] = "true",
+                                    ["x-brand"] = "1",
+                                    ["x-idcanale"] = "1"
+                                },
+                                ["referrer"] = "https://" + domain + "/scommesse/sport/",
+                                ["referrerPolicy"] = "strict-origin-when-cross-origin",
+                                ["body"] = JValue.CreateNull(),
+                                ["method"] = "GET",
+                                ["mode"] = "cors",
+                                ["credentials"] = "include"
+                            };
 
-                                    Global.strPlaceBetResult = "";
-                                    Global.waitResponseEvent.Reset();
+                            string responseData = "";
+                            string functionString = $"var link = ''; fetch(\"{getLiveOddURL}\", {getLiveOddsJOB}).then(res=>res.json()).then(json=>{{link = json}});";
+                            CDPController.Instance.ExecuteScript(functionString);
+                            Thread.Sleep(5000);
+                            int count = 0;
+                            while (count < 20)
+                            {
+                                responseData = CDPController.Instance.ExecuteScript("JSON.stringify(link)", true, true);
+                                if (!string.IsNullOrEmpty(responseData))
+                                    break;
+                                Thread.Sleep(1000);
+                                count++;
+                            }
 
-                                    Global.RunScriptCode(functionString);
+                            if (string.IsNullOrEmpty(responseData))
+                            {
+                                LogMng.Instance.onWriteStatus("getliveOdds request error");
+                                return PROCESS_RESULT.ERROR;
+                            }
 
+                            var strEventContent = responseData;
 
-                                    if (!Global.waitResponseEvent.Wait(20000) || string.IsNullOrEmpty(Global.strPlaceBetResult))
-                                    {
-                                        continue;
-                                    }
-
-                                    strBetResp = Global.strPlaceBetResult;
 
 #if (TROUBLESHOT)
-                                    LogMng.Instance.onWriteStatus("insertBet Res:" + strBetResp);
+                            LogMng.Instance.onWriteStatus("all live sports--");
+                            LogMng.Instance.onWriteStatus(strEventContent);
 #endif
 
-                                    break;
-                                }
-                                catch (Exception ex)
+                            double maxSimilarity = 0;
+                            string EventdetailUrl = string.Empty;
+
+                            JObject origObject3 = JObject.Parse(strEventContent);
+                            foreach (var objEvent in origObject3["leo"])
+                            {
+                                double similarity = Similarity.GetSimilarityRatio(objEvent["enm"].ToString(), info.eventTitle, out double ratio1, out double ratio2);
+
+                                if (similarity > maxSimilarity)
                                 {
-                                    LogMng.Instance.onWriteStatus("insertBet exception:" + ex);
+                                    maxSimilarity = similarity;
+
+                                    aamsId = objEvent["aid"].ToString();
+                                    catId = objEvent["cid"].ToString();
+                                    disId = objEvent["sid"].ToString();
+                                    evnDate = objEvent["edt"].ToString();
+                                    evnDateTs = objEvent["edts"].ToString();
+                                    evtId = objEvent["eid"].ToString();
+                                    evtName = objEvent["enm"].ToString();
+                                    onLineCode = objEvent["ocd"].ToString();
+                                    prvIdEvt = objEvent["eprId"].ToString();
+                                    tId = objEvent["tid"].ToString();
+                                    tName = objEvent["tdsc"].ToString();
+                                    vrt = objEvent["vrt"].ToString().ToLower();
+                                    EventdetailUrl = string.Format("https://" + domain + "/scommesse/getDetailsEventLive/{0}/{1}", objEvent["sid"].ToString(), objEvent["eid"].ToString());
                                 }
                             }
-                            
-                            dynamic jsonBetResp = JsonConvert.DeserializeObject<dynamic>(strBetResp);
+
+                            if (!string.IsNullOrEmpty(tName))
+                            {
+                                double similarity1 = Similarity.GetSimilarityRatio(tName, info.league, out double ratio11, out double ratio21);
+                                if (similarity1 < 50)
+                                {
+                                    EventdetailUrl = "";
+                                }
+                            }
+
+                            if (string.IsNullOrEmpty(EventdetailUrl))
+                            {
+                                LogMng.Instance.onWriteStatus("Didn't find target event");
+                                return PROCESS_RESULT.ERROR;
+                            }
+
+                            bool bFound = false;
+
+                            CDPController.Instance.strRequestUrl = EventdetailUrl;
+                            string baseURL = "https://" + domain;
+                            JObject requestObject = new JObject
+                            {
+                                ["method"] = "GET",
+                                ["headers"] = new JObject
+                                {
+                                    ["accept"] = "*/*",
+                                    ["accept-language"] = "es,en-US;q=0.9,en;q=0.8,fr;q=0.7",
+                                    ["content-type"] = "application/json"
+                                },
+                                ["credentials"] = "include",
+                                ["referrerPolicy"] = "strict-origin-when-cross-origin",
+                                ["referrer"] = baseURL
+                            };
+                            string responseDatacheck = "";
+                            string functionstring1 = $"var link = ''; fetch(\"{CDPController.Instance.strRequestUrl}\", {requestObject}).then(res=>res.json()).then(json=>{{link = json}});";
+                            CDPController.Instance.ExecuteScript(functionstring1);
+                            Thread.Sleep(4000);
+                            int count1 = 0;
+                            while (count < 20)
+                            {
+                                responseDatacheck = CDPController.Instance.ExecuteScript("JSON.stringify(link)", true, true);
+                                if (!string.IsNullOrEmpty(responseDatacheck))
+                                    break;
+                                Thread.Sleep(1000);
+                                count1++;
+                            }
+                            if (string.IsNullOrEmpty(responseDatacheck))
+                            {
+                                LogMng.Instance.onWriteStatus("GetAllLivesMatches Error");
+                                return PROCESS_RESULT.ERROR;
+                            }
+
+
+                            string strContent = responseDatacheck;
+#if (TROUBLESHOT)
+                            LogMng.Instance.onWriteStatus("target match--");
+                            LogMng.Instance.onWriteStatus(strContent);
+#endif
+                            JObject origObject4 = JObject.Parse(strContent);
+                            foreach (var objEvent in origObject4["mktWbG"])
+                            {
+                                JToken matchObj = objEvent.ToObject<JProperty>().Value;
+
+                                foreach (var marketEvent in matchObj["ms"])
+                                {
+                                    JToken marketObj = marketEvent.ToObject<JProperty>().Value;
+                                    foreach (var piEvent in marketObj["asl"])
+                                    {
+                                        if (piEvent["oi"].ToString() == info.direct_link)
+                                        {                                            
+                                            markId = piEvent["mi"].ToString();
+                                            markName = matchObj["mn"].ToString();
+                                            markTypId = piEvent["mti"].ToString();
+                                            oddsId = piEvent["oi"].ToString();
+                                            oddsValue = piEvent["ov"].ToString().Replace(",", ".");
+                                            selId = piEvent["si"].ToString();
+                                            selName = piEvent["sn"].ToString();
+                                            sNL = piEvent["sNL"].ToString();
+                                            bFound = true;
+                                            break;
+                                        }
+                                    }
+                                    if (bFound)
+                                        break;
+                                }
+                                if (bFound)
+                                    break;
+                            }
+
+                            if (!bFound)
+                            {
+                                LogMng.Instance.onWriteStatus("Didn't find target market(pi)");
+                                return PROCESS_RESULT.ERROR;
+                            }
+
+                            NewOdd = Utils.ParseToDouble(oddsValue);
+                            curOdds = NewOdd;
+                            LogMng.Instance.onWriteStatus($"SelNewOdd : {NewOdd}");
+                            selIDs = selId;
+                            LogMng.Instance.onWriteStatus($"SelId: {selIDs} ready for bet");
+
+                            if (CheckOddDropCancelBet(NewOdd, info))
+                            {
+                                LogMng.Instance.onWriteStatus(string.Format("Odd is changed from {0} To {1}", info.odds, NewOdd.ToString("N2")));
+                                return PROCESS_RESULT.ERROR;
+                            }
+
+                            string strinsert_Result = string.Empty;
+                            int retry = 5;
+                            while (--retry > 0)
+                            {
+                                string responseData_insertBet = "";
+
+                                string bodyArray = $"{{\"TagType\":12,\"Username\":\"{Setting.Instance.username}\",\"AuthToken\":\"{authToken}\",\"UserId\":{Idau},\"IdUtente\":{Idau},\"IdUser\":{Idau},\"Payload\":{{\"ReservationMaker\":3,\"allowOddChanges\":true,\"allowStakeReduction\":true,\"creationTime\":{Utils.getTick()},\"events\":[{{\"categoryDescription\":\"{categoryDescription}\",\"selId\":{selId},\"evtName\":\"{evtName}\",\"evnDate\":\"{evnDate}\",\"tName\":\"{tName}\",\"markName\":\"{markName}\",\"markId\":{markId},\"selName\":\"{selName}\",\"oddsValue\":{oddsValue},\"markMultipla\":0,\"isLive\":false,\"oddsId\":{oddsId},\"evtId\":{evtId},\"disId\":{disId},\"catId\":{catId},\"tId\":{tId},\"aamsId\":\"{aamsId}\",\"onLineCode\":{onLineCode},\"firstTeam\":\"{info.homeTeam}\",\"secondTeam\":\"{info.awayTeam}\",\"idSelectionType\":0,\"markTypId\":0,\"aamsGamePlay\":0,\"sportName\":\"{sportName}\",\"vrt\":false,\"spreadId\":\"0\",\"stake\":{Setting.Instance.stakeSports},\"isRigiocoVillaggio\":false}}],\"fixed\":[],\"groupCombs\":{{\"combsInfo\":[{{\"combNum\":1,\"combType\":1,\"stake\":{Setting.Instance.stakeSports}}}],\"sumCombsXType\":1}},\"totalStake\":{Setting.Instance.stakeSports},\"virtual\":false,\"bonusWager\":false}},\"idCanale\":1}}";
+
+                                string insertBetUrl = "https://" + domain + "/api/sport/book/insertBet";
+                                var insertBetObj = new JObject
+                                {
+                                    ["headers"] = new JObject
+                                    {
+                                        ["accept"] = "application/json, text/plain, */*",
+                                        ["accept-language"] = "en-US,en;q=0.9",
+                                        ["content-type"] = "application/json",
+                                        ["priority"] = "u=1, i",
+                                        ["sec-ch-ua"] = "\"Google Chrome\";v=\"131\", \"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\"",
+                                        ["sec-ch-ua-mobile"] = "?0",
+                                        ["sec-ch-ua-platform"] = "\"Windows\"",
+                                        ["sec-fetch-dest"] = "empty",
+                                        ["sec-fetch-mode"] = "cors",
+                                        ["sec-fetch-site"] = "same-origin",
+                                        ["x-acceptconsent"] = "true",
+                                        ["x-auth-iduser"] = Idau,
+                                        ["x-auth-token"] = authToken,
+                                        ["x-auth-username"] = Setting.Instance.username,
+                                        ["x-brand"] = "1",
+                                        ["x-idcanale"] = "1"
+                                    },
+                                    ["referrer"] = "https://" + domain + "/scommesse/" + info.siteUrl,
+                                    ["referrer"] = string.Format("https://{0}/scommesse/{1}", domain, info.siteUrl),
+                                    ["referrerPolicy"] = "strict-origin-when-cross-origin",
+                                    ["body"] = bodyArray,
+                                    ["method"] = "POST",
+                                    ["mode"] = "cors",
+                                    ["credentials"] = "include"
+                                };
+                                string functionstring_InsertBet = $"var link = ''; fetch(\"{insertBetUrl}\", {insertBetObj}).then(res=>res.json()).then(json=>{{link = json}});";
+                                CDPController.Instance.ExecuteScript(functionstring_InsertBet);
+                                Thread.Sleep(4000);
+                                int count2 = 0;
+                                while (count2 < 20)
+                                {
+                                    responseData_insertBet = CDPController.Instance.ExecuteScript("JSON.stringify(link)", true, true);
+                                    if (!string.IsNullOrEmpty(responseData_insertBet))
+                                        break;
+                                    Thread.Sleep(1000);
+                                    count2++;
+                                }
+
+                                if (string.IsNullOrEmpty(responseData_insertBet))
+                                {
+                                    LogMng.Instance.onWriteStatus("insertbet no response");
+                                    return PROCESS_RESULT.ERROR;
+                                }
+
+                                strinsert_Result = responseData_insertBet;
+                                break;
+
+                            }
+                            dynamic jsonBetResp = JsonConvert.DeserializeObject<dynamic>(strinsert_Result);
 
                             if (jsonBetResp.success.ToString() == "True")
                             {
 #if (TROUBLESHOT)
                                 LogMng.Instance.onWriteStatus(string.Format("Placed bet in Step 1"));
 #endif
-                                string confirmBetUrl = "https://" + domain + "/scommesse/pendingBet/" + jsonBetResp.data.couponCode.ToString();
+                                string confirmBetUrl = "https://" + domain + "/api/sport/book/pendingBet";
                                 string strConfirmBetResp = string.Empty;
-                                subRetryCount = 6;
-                                while (--subRetryCount > 0)
+                                retry = 3;
+                                while (--retry > 0)
                                 {
                                     try
                                     {
-                                        Global.strRequestUrl = confirmBetUrl;
-                                        functionString = $"window.fetch('{Global.strRequestUrl}', {{ headers: {{ accept: '*/*', 'accept-language': 'es,en-US;q=0.9,en;q=0.8,fr;q=0.7', 'content-type': 'application/json' }}, mode: 'cors', credentials: 'include', referrerPolicy: 'strict-origin-when-cross-origin', body: '', method: 'POST' }}).then(response => response.json());";
+                                        JObject requestObjectPending = new JObject
+                                        {
+                                            ["headers"] = new JObject
+                                            {
+                                                ["accept"] = "application/json, text/plain, */*",
+                                                ["accept-language"] = "en-US,en;q=0.9",
+                                                ["content-type"] = "application/json",
+                                                ["priority"] = "u=1, i",
+                                                ["sec-ch-ua"] = "\"Google Chrome\";v=\"131\", \"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\"",
+                                                ["sec-ch-ua-mobile"] = "?0",
+                                                ["sec-ch-ua-platform"] = "\"Windows\"",
+                                                ["sec-fetch-dest"] = "empty",
+                                                ["sec-fetch-mode"] = "cors",
+                                                ["sec-fetch-site"] = "same-origin",
+                                                ["x-acceptconsent"] = "true",
+                                                ["x-auth-iduser"] = Idau,
+                                                ["x-auth-token"] = $"{authToken}",
+                                                ["x-auth-username"] = "silvilore",
+                                                ["x-brand"] = "1",
+                                                ["x-idcanale"] = "1"
+                                            },
+                                            ["referrer"] = "https://" + domain + "/scommesse/" + info.siteUrl,
+                                            ["referrer"] = string.Format("https://{0}/scommesse/{1}", domain, info.siteUrl),
+                                            ["referrerPolicy"] = "strict-origin-when-cross-origin",
+                                            ["body"] = $"{{\"AuthToken\":\"{authToken}\",\"UserId\":{Idau},\"IdUtente\":{Idau},\"IdUser\":{Idau},\"idCanale\":1,\"CouponCode\":\"{jsonBetResp.data.couponCode}\"}}",
+                                            ["method"] = "POST",
+                                            ["mode"] = "cors",
+                                            ["credentials"] = "include"
+                                        };
+                                        string responsedata = "";
+                                        string functionstring_pending = $"var link = ''; fetch(\"{confirmBetUrl}\", {requestObjectPending}).then(res=>res.json()).then(json=>{{link = json}});";
+                                        CDPController.Instance.ExecuteScript(functionstring_pending);
+                                        Thread.Sleep(4000);
+                                        int count3 = 0;
+                                        while (count3 < 20)
+                                        {
+                                            responsedata = CDPController.Instance.ExecuteScript("JSON.stringify(link)", true, true);
+                                            if (!string.IsNullOrEmpty(responsedata))
+                                                break;
+                                            Thread.Sleep(1000);
+                                            count3++;
+                                        }
 
-                                        Global.strPlaceBetResult = "";
-                                        Global.waitResponseEvent.Reset();
-
-                                        Global.RunScriptCode(functionString);
-
-
-                                        if (!Global.waitResponseEvent.Wait(20000) || string.IsNullOrEmpty(Global.strPlaceBetResult))
+                                        if (string.IsNullOrEmpty(responsedata))
                                         {
                                             continue;
                                         }
 
-                                        strConfirmBetResp = Global.strPlaceBetResult;
-
+                                        strConfirmBetResp = responsedata;
 #if (TROUBLESHOT)
                                         LogMng.Instance.onWriteStatus("pendingBet Res:" + strConfirmBetResp);
 #endif
@@ -1161,13 +569,13 @@ namespace Project.Bookie
                                     }
                                 }
                                 dynamic jsonConfirmBetResp = JsonConvert.DeserializeObject<dynamic>(strConfirmBetResp);
-
-                                if (jsonConfirmBetResp.statusDesc.ToString() == "Placed" || jsonConfirmBetResp.statusDesc.ToString() == "P")
+                                LogMng.Instance.onWriteStatus($"Placing failed Reason: {jsonConfirmBetResp.statusCode}");
+                                if (jsonConfirmBetResp.statusCode.ToString() == "Placed" || jsonConfirmBetResp.statusCode.ToString() == "P")
+                                {
                                     return PROCESS_RESULT.PLACE_SUCCESS;
-                                
-                                LogMng.Instance.onWriteStatus($"Placing failed Reason: {jsonConfirmBetResp.statusDesc}");
-                                return PROCESS_RESULT.ERROR;
+                                }
 
+                                return PROCESS_RESULT.ERROR;
                             }
                             else if (jsonBetResp.error.error.ToString() == "998")
                             {
@@ -1186,28 +594,395 @@ namespace Project.Bookie
                                 return PROCESS_RESULT.ERROR;
                             }
 
+
                         }
                         catch (Exception ex)
                         {
-#if OXYLABS
-                        if (e.Message.Contains("An error occurred while sending the request"))
-                        {
-                            Global.ProxySessionID = new Random().Next().ToString();
-                            m_client = initHttpClient(false);
-                        }
-#endif
+                            LogMng.Instance.onWriteStatus($"getLiveEventJsonString: {ex.Message}");
                         }
                     }
+                    else
+                    {
+
+                        CDPController.Instance.strRequestUrl = "https://" + domain + "/scommesse/" + info.siteUrl;
+                        string tid = Utils.Between(info.siteUrl, "tid=", "&");
+                        string eventid = Utils.Between(info.siteUrl, "eid=", "&");
+                        string createUrl = "https://" + domain + "/api/sport/pregame/getDetailsEvent/" + tid + "/" + eventid + "/0";
+                        string responseData = "";                        
+                        Thread.Sleep(4000);
+
+                        JObject jsonObject = new JObject
+                        {
+                            ["headers"] = new JObject
+                            {
+                                ["accept"] = "application/json, text/plain, */*",
+                                ["accept-language"] = "en-US,en;q=0.9",
+                                ["content-type"] = "application/json",
+                                ["priority"] = "u=1, i",
+                                ["sec-ch-ua"] = "\"Google Chrome\";v=\"131\", \"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\"",
+                                ["sec-ch-ua-mobile"] = "?0",
+                                ["sec-ch-ua-platform"] = "\"Windows\"",
+                                ["sec-fetch-dest"] = "empty",
+                                ["sec-fetch-mode"] = "cors",
+                                ["sec-fetch-site"] = "same-origin",
+                                ["x-acceptconsent"] = "true",                                
+                                ["x-brand"] = "1",
+                                ["x-idcanale"] = "1"
+                            },
+                            ["referrer"] = "https://" + domain + info.siteUrl,
+                            ["referrerPolicy"] = "strict-origin-when-cross-origin",
+                            ["body"] = null,
+                            ["method"] = "GET",
+                            ["mode"] = "cors",
+                            ["credentials"] = "include"
+                        };
+                        string functionString2 = $"var link = ''; fetch(\"{createUrl}\", {jsonObject}).then(res=>res.json()).then(json=>{{link = json}});";
+                        CDPController.Instance.ExecuteScript(functionString2);
+                        Thread.Sleep(5000);
+                        int count = 0;
+                        while (count < 20)
+                        {
+                            responseData = CDPController.Instance.ExecuteScript("JSON.stringify(link)", true, true);
+                            if (!string.IsNullOrEmpty(responseData))
+                                break;
+                            Thread.Sleep(1000);
+                            count++;
+                        }
+
+                        if (string.IsNullOrEmpty(responseData))
+                        {
+                            LogMng.Instance.onWriteStatus("GetAllLivesMatches Error");
+                            return PROCESS_RESULT.ERROR;
+                        }
+
+#if (TROUBLESHOT)
+                        LogMng.Instance.onWriteStatus("event Data Json--");
+                        LogMng.Instance.onWriteStatus(responseData);
+#endif
+
+
+                        JObject origObject1 = JObject.Parse(responseData);
+
+                        bool bFound = false;
+                        foreach (JObject origObject2 in origObject1["leo"])
+                        {
+                            foreach (dynamic origObject3 in origObject2["mmkW"])
+                            {
+                                foreach (var origObject4 in origObject3.Value["spd"])
+                                {
+                                    foreach (var origObject5 in origObject4.Value["asl"])
+                                    {
+                                        if (origObject5["oi"].ToString() == info.direct_link)
+                                        {
+                                            aamsId = origObject2["mi"].ToString();
+                                            catId = origObject2["ci"].ToString();
+                                            disId = origObject2["si"].ToString();
+                                            evnDate = origObject2["ed"].ToString();                                            
+                                            evtId = origObject2["ei"].ToString();
+                                            evtName = origObject2["en"].ToString();                                            
+                                            idSlt = origObject3.Value["sslI"].ToString();
+                                            markId = origObject5["mi"].ToString();                                            
+                                            markName = origObject3.Value["mn"].ToString();
+                                            markTypId = origObject5["mti"].ToString();
+                                            oddsId = origObject5["oi"].ToString();
+                                            oddsValue = origObject5["ov"].ToString().Replace(",", ".");
+                                            onLineCode = origObject2["oc"].ToString();
+                                            selId = origObject5["si"].ToString();
+                                            selName = origObject5["sn"].ToString();
+                                            tId = origObject2["ti"].ToString();
+                                            tName = origObject2["td"].ToString();
+                                            sportName = origObject2["sn"].ToString();
+                                            categoryDescription = origObject2["cd"].ToString();
+                                            vrt = "false";
+                                            NewOdd = Utils.ParseToDouble(oddsValue);
+                                            curOdds = NewOdd;
+                                            LogMng.Instance.onWriteStatus($"SelNewOdd : {NewOdd}");
+
+                                            if (CheckOddDropCancelBet(NewOdd, info))
+                                            {
+                                                LogMng.Instance.onWriteStatus(string.Format("Odd is changed from {0} To {1}", info.odds, NewOdd.ToString("N2")));
+                                                return PROCESS_RESULT.ERROR;
+                                            }
+                                            
+                                            
+                                            selIDs = selId;
+                                            LogMng.Instance.onWriteStatus($"SelId: {selIDs} ready for bet");
+                                            bFound = true;
+                                            break;
+                                        }
+                                    }
+                                    if (bFound)
+                                        break;
+                                }
+                                if (bFound)
+                                    break;
+                            }
+                            if (bFound)
+                                break;
+                        }
+                        string strinsert_Result = string.Empty;
+                        int retry = 5;
+                        while (--retry > 0)
+                        {
+
+                            string responseData_insertBet = "";
+
+                            string bodyArray = $"{{\"TagType\":12,\"Username\":\"{Setting.Instance.username}\",\"AuthToken\":\"{authToken}\",\"UserId\":{Idau},\"IdUtente\":{Idau},\"IdUser\":{Idau},\"Payload\":{{\"ReservationMaker\":3,\"allowOddChanges\":true,\"allowStakeReduction\":true,\"creationTime\":{Utils.getTick()},\"events\":[{{\"categoryDescription\":\"{categoryDescription}\",\"selId\":{selId},\"evtName\":\"{evtName}\",\"evnDate\":\"{evnDate}\",\"tName\":\"{tName}\",\"markName\":\"{markName}\",\"markId\":{markId},\"selName\":\"{selName}\",\"oddsValue\":{oddsValue},\"markMultipla\":0,\"isLive\":false,\"oddsId\":{oddsId},\"evtId\":{evtId},\"disId\":{disId},\"catId\":{catId},\"tId\":{tId},\"aamsId\":\"{aamsId}\",\"onLineCode\":{onLineCode},\"firstTeam\":\"{info.homeTeam}\",\"secondTeam\":\"{info.awayTeam}\",\"idSelectionType\":0,\"markTypId\":0,\"aamsGamePlay\":0,\"sportName\":\"{sportName}\",\"vrt\":false,\"spreadId\":\"0\",\"stake\":{Setting.Instance.stakeSports},\"isRigiocoVillaggio\":false}}],\"fixed\":[],\"groupCombs\":{{\"combsInfo\":[{{\"combNum\":1,\"combType\":1,\"stake\":{Setting.Instance.stakeSports}}}],\"sumCombsXType\":1}},\"totalStake\":{Setting.Instance.stakeSports},\"virtual\":false,\"bonusWager\":false}},\"idCanale\":1}}";
+
+                            string insertBetUrl = "https://" + domain + "/api/sport/book/insertBet"; 
+                            var insertBetObj = new JObject
+                            {
+                                ["headers"] = new JObject
+                                {
+                                    ["accept"] = "application/json, text/plain, */*",
+                                    ["accept-language"] = "en-US,en;q=0.9",
+                                    ["content-type"] = "application/json",
+                                    ["priority"] = "u=1, i",
+                                    ["sec-ch-ua"] = "\"Google Chrome\";v=\"131\", \"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\"",
+                                    ["sec-ch-ua-mobile"] = "?0",
+                                    ["sec-ch-ua-platform"] = "\"Windows\"",
+                                    ["sec-fetch-dest"] = "empty",
+                                    ["sec-fetch-mode"] = "cors",
+                                    ["sec-fetch-site"] = "same-origin",
+                                    ["x-acceptconsent"] = "true",
+                                    ["x-auth-iduser"] = Idau,
+                                    ["x-auth-token"] = authToken,
+                                    ["x-auth-username"] = Setting.Instance.username,
+                                    ["x-brand"] = "1",
+                                    ["x-idcanale"] = "1"
+                                },
+                                ["referrer"] = "https://" + domain + "/scommesse/" + info.siteUrl,
+                                ["referrer"] = string.Format("https://{0}/scommesse/{1}", domain, info.siteUrl),
+                                ["referrerPolicy"] = "strict-origin-when-cross-origin",
+                                ["body"] = bodyArray,
+                                ["method"] = "POST",
+                                ["mode"] = "cors",
+                                ["credentials"] = "include"
+                            };
+                            string functionstring_InsertBet = $"var link = ''; fetch(\"{insertBetUrl}\", {insertBetObj}).then(res=>res.json()).then(json=>{{link = json}});";
+                            CDPController.Instance.ExecuteScript(functionstring_InsertBet);
+                            Thread.Sleep(4000);
+                            int count1 = 0;
+                            while (count1 < 20)
+                            {
+                                responseData_insertBet = CDPController.Instance.ExecuteScript("JSON.stringify(link)", true, true);
+                                if (!string.IsNullOrEmpty(responseData_insertBet))
+                                    break;
+                                Thread.Sleep(1000);
+                                count1++;
+                            }
+
+                            if (string.IsNullOrEmpty(responseData_insertBet))
+                            {
+                                LogMng.Instance.onWriteStatus("insertbet no response");
+                                return PROCESS_RESULT.ERROR;
+                            }
+
+                            strinsert_Result = responseData_insertBet;
+                            break;
+
+                        }
+                        dynamic jsonBetResp = JsonConvert.DeserializeObject<dynamic>(strinsert_Result);
+
+                        if (jsonBetResp.success.ToString() == "True")
+                        {
+#if (TROUBLESHOT)
+                            LogMng.Instance.onWriteStatus(string.Format("Placed bet in Step 1"));
+#endif
+                            string confirmBetUrl = "https://" + domain + "/api/sport/book/pendingBet";
+                            string strConfirmBetResp = string.Empty;
+                            retry = 3;
+                            while (--retry > 0)
+                            {
+                                try
+                                {
+                                    JObject requestObjectPending = new JObject
+                                    {
+                                        ["headers"] = new JObject
+                                        {
+                                            ["accept"] = "application/json, text/plain, */*",
+                                            ["accept-language"] = "en-US,en;q=0.9",
+                                            ["content-type"] = "application/json",
+                                            ["priority"] = "u=1, i",
+                                            ["sec-ch-ua"] = "\"Google Chrome\";v=\"131\", \"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\"",
+                                            ["sec-ch-ua-mobile"] = "?0",
+                                            ["sec-ch-ua-platform"] = "\"Windows\"",
+                                            ["sec-fetch-dest"] = "empty",
+                                            ["sec-fetch-mode"] = "cors",
+                                            ["sec-fetch-site"] = "same-origin",
+                                            ["x-acceptconsent"] = "true",
+                                            ["x-auth-iduser"] = Idau,
+                                            ["x-auth-token"] = $"{authToken}",
+                                            ["x-auth-username"] = "silvilore",
+                                            ["x-brand"] = "1",
+                                            ["x-idcanale"] = "1"
+                                        },
+                                        ["referrer"] = "https://" + domain + "/scommesse/" + info.siteUrl,
+                                        ["referrer"] = string.Format("https://{0}/scommesse/{1}", domain, info.siteUrl),
+                                        ["referrerPolicy"] = "strict-origin-when-cross-origin",
+                                        ["body"] = $"{{\"AuthToken\":\"{authToken}\",\"UserId\":{Idau},\"IdUtente\":{Idau},\"IdUser\":{Idau},\"idCanale\":1,\"CouponCode\":\"{jsonBetResp.data.couponCode}\"}}",
+                                        ["method"] = "POST",
+                                        ["mode"] = "cors",
+                                        ["credentials"] = "include"
+                                    };
+                                    string responsedata = "";
+                                    string functionstring_pending = $"var link = ''; fetch(\"{confirmBetUrl}\", {requestObjectPending}).then(res=>res.json()).then(json=>{{link = json}});";
+                                    CDPController.Instance.ExecuteScript(functionstring_pending);
+                                    Thread.Sleep(4000);
+                                    int count1 = 0;
+                                    while (count1 < 20)
+                                    {
+                                        responsedata = CDPController.Instance.ExecuteScript("JSON.stringify(link)", true, true);
+                                        if (!string.IsNullOrEmpty(responsedata))
+                                            break;
+                                        Thread.Sleep(1000);
+                                        count1++;
+                                    }
+
+                                    if (string.IsNullOrEmpty(responsedata))
+                                    {
+                                        continue;
+                                    }
+
+                                    strConfirmBetResp = responsedata;
+#if (TROUBLESHOT)
+                                    LogMng.Instance.onWriteStatus("pendingBet Res:" + strConfirmBetResp);
+#endif
+
+                                    break;
+                                }
+                                catch (Exception ex)
+                                {
+                                    LogMng.Instance.onWriteStatus("pendingBet exception:" + ex);
+                                }
+                            }
+                            dynamic jsonConfirmBetResp = JsonConvert.DeserializeObject<dynamic>(strConfirmBetResp);
+                            LogMng.Instance.onWriteStatus($"Placing failed Reason: {jsonConfirmBetResp.statusCode}");
+                            if (jsonConfirmBetResp.statusCode.ToString() == "Placed" || jsonConfirmBetResp.statusCode.ToString() == "P")
+                            {
+                                return PROCESS_RESULT.PLACE_SUCCESS;
+                            }
+
+                            return PROCESS_RESULT.ERROR;
+                        }
+                        else if (jsonBetResp.error.error.ToString() == "998")
+                        {
+                            bool bRet = login();
+                            if (!bRet)
+                            {
+                                LogMng.Instance.onWriteStatus(string.Format("Bet failed(Need relogin)"));
+                                return PROCESS_RESULT.NO_LOGIN;
+                            }
+                            LogMng.Instance.onWriteStatus(string.Format("Retry after relogin"));
+                        }
+                        else if (jsonBetResp.error.error.ToString() == "30")
+                        {
+                            LogMng.Instance.onWriteStatus(string.Format("Bet failed(+++++YOUR STAKE IS LOW+++++)"));
+                            return PROCESS_RESULT.ERROR;
+                        }
+                        else
+                        {
+                            LogMng.Instance.onWriteStatus(string.Format("Place bet failed. {0} ", jsonBetResp.error.ToString()));
+
+                            return PROCESS_RESULT.ERROR;
+                        }
+                    }
+                    
+                        
+                    
                 }
+                            
             }
             catch (Exception ex)
             {
                 LogMng.Instance.onWriteStatus($"Place bet exception {ex.StackTrace} {ex.Message}");
             }
-            
-            LogMng.Instance.onWriteStatus(string.Format("** PLACE BET FAIL"));
+
             return PROCESS_RESULT.ERROR;
+        }      
+
+        public string Hashpassword(string password)
+        {
+                       
+
+            using (SHA256 sha256 = SHA256.Create())
+                {
+                    byte[] bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+                    StringBuilder builder = new StringBuilder();
+                    foreach (byte b in bytes)
+                    {
+                        builder.Append(b.ToString("x2")); // Converts to a hex string
+                    }
+                    return builder.ToString();
+                }
+            
         }
+
+        public string GetAuthAndIdUtente(string hashedPassword, string userName)
+        {
+            string strLogin_Result = string.Empty;
+            string auth_token = string.Empty;
+            string IdUtenteInfo = string.Empty;
+            string strAuthandIdUT = string.Empty;
+            string balance_Current = string.Empty;
+            string logInUrl = "https://" + domain + "/api/pam/account/login";
+            string bodyArray = $"{{\"username\":\"{userName}\",\"password\":\"{hashedPassword}\",\"claims\":\"/tj/IXi8Q2xAY5ptpSKp8Aeepvo=\",\"blackboxIovation\":\"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;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\",\"idCanale\":1,\"ipUtente\":null,\"vertical\":1,\"CodiceTransazione\":\"0ad1590b-c81b-480e-924b-41a977570020\"}}";
+            JObject getIoginJOB = new JObject
+            {
+                ["headers"] = new JObject
+                {
+                    ["accept"] = "application/json, text/plain, */*",
+                    ["accept-language"] = "en-US,en;q=0.9",
+                    ["content-type"] = "application/json",
+                    ["priority"] = "u=1, i",
+                    ["sec-ch-ua"] = "\"Google Chrome\";v=\"131\", \"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\"",
+                    ["sec-ch-ua-mobile"] = "?0",
+                    ["sec-ch-ua-platform"] = "\"Windows\"",
+                    ["sec-fetch-dest"] = "empty",
+                    ["sec-fetch-mode"] = "cors",
+                    ["sec-fetch-site"] = "same-origin",
+                    ["x-acceptconsent"] = "true",
+                    ["x-brand"] = "1",
+                    ["x-idcanale"] = "1"
+                },
+                ["referrer"] = "https://" + domain + "/scommesse/sport/",
+                ["referrerPolicy"] = "strict-origin-when-cross-origin",
+                ["body"] = bodyArray,
+                ["method"] = "POST",
+                ["mode"] = "cors",
+                ["credentials"] = "include"
+            };
+
+            string responseData = "";
+            string functionString = $"var link = ''; fetch(\"{logInUrl}\", {getIoginJOB}).then(res=>res.json()).then(json=>{{link = json}});";
+            CDPController.Instance.ExecuteScript(functionString);
+            Thread.Sleep(5000);
+            int count = 0;
+            while (count < 20)
+            {
+                responseData = CDPController.Instance.ExecuteScript("JSON.stringify(link)", true, true);
+                if (!string.IsNullOrEmpty(responseData))
+                    break;
+                Thread.Sleep(1000);
+                count++;
+            }
+
+            if (string.IsNullOrEmpty(responseData))
+            {
+                LogMng.Instance.onWriteStatus("getAuthKEY request error");              
+            }
+
+            strLogin_Result = responseData;
+            dynamic jsonLotinResp = JsonConvert.DeserializeObject<dynamic>(responseData);
+            auth_token = jsonLotinResp.AuthToken.ToString();
+            IdUtenteInfo = (string)jsonLotinResp.IdUtente;
+            balance_Current = (string)jsonLotinResp.Saldo;
+            strAuthandIdUT = auth_token + "/" + IdUtenteInfo + "/" + balance_Current;
+            return strAuthandIdUT;
+
+        }
+             
+
 
         bool CheckOddDropCancelBet(double newOdd, BetburgerInfo info)
         {
@@ -1246,39 +1021,67 @@ namespace Project.Bookie
             return false;
         }
 
+
         public double getBalance()
-        { 
+        {
+            Thread.Sleep(10000);
             int nRetry = 2;            
             double balance = 0;
+            string userName = Setting.Instance.username;
+            string password = Setting.Instance.password;
+            string hashedPassword = Hashpassword(password);
+            string authTokenAndIdau = GetAuthAndIdUtente(hashedPassword, userName);
+            parts = authTokenAndIdau.Split('/');
+            authToken = parts[0];
+            Idau = parts[1];
+            get_Balance = parts[2];
             while (nRetry >= 0)
             {
                 nRetry--;
                 try
-                {
-
-                    //string auth_token = CDPController.Instance.auth_token; 
-                    //string ReqJson = "\"{\\\"IdCanale\\\":13,\\\"IdUtente\\\":5827848,\\\"IpUtente\\\":null,\\\"idCanale\\\":13,\\\"CodiceTransazione\\\":\\\"221d7e2e-64fb-4516-9548-84161a510966\\\",\\\"vertical\\\":1}\"";                   
-                    //string X = "\"x-acceptconsent\": \"true\",\r\n    \"x-auth-iduser\": \"5827848\",\r\n    \"x-auth-token\": \"" + auth_token + "\",\r\n    \"x-auth-username\": \"silvilore\",\r\n    \"x-brand\": \"1\",\r\n    \"x-idcanale\": \"13\"";
-                    //X = X.Replace("\r\n", "");
-                    //string javaCode = "\"priority\": \"u=1, i\",\r\n    \"sec-ch-ua\": \"\\\"Google Chrome\\\";v=\\\"131\\\", \\\"Chromium\\\";v=\\\"131\\\", \\\"Not_A Brand\\\";v=\\\"24\\\"\",\r\n    \"sec-ch-ua-mobile\": \"?0\",\r\n    \"sec-ch-ua-platform\": \"\\\"Windows\\\"\",\r\n    \"sec-fetch-dest\": \"empty\",\r\n    \"sec-fetch-mode\": \"cors\",\r\n    \"sec-fetch-site\": \"same-origin\"";
-                    //javaCode = javaCode.Replace("\"", "'").Replace("\r\n", "");
-                    //string getBalanceURL = "https://" + domain + "/api/pam/cashier/getbalanceheader";
-                    //string functionString = $"window.fetch('{getBalanceURL}', {{ \"headers\": {{ \"accept\": 'application/json, text/plain, */*', 'accept-language': 'en-US,en;q=0.9', 'content-type':'application/json', {javaCode}, {X}}}, \"referrer\":'https://www.goldbet.it/scommesse/sport/', \"referrerPolicy\": 'strict-origin-when-cross-origin', \"body\": {ReqJson}, \"method\": 'POST', \"mode\": 'cors', \"credentials\": 'include'}}).then(response => response.json());";
-                    //functionString = functionString.Replace("'", "\"");
-
-                    //string result = CDPController.Instance.ExecuteScript(functionString, true);
-                    //CDPController.Instance.PlaceBetRespBody = "";
-                    balance = Convert.ToDouble(CDPController.Instance.balanceRespBody) / 100;                    
+                {                    
+                    balance = Convert.ToDouble(get_Balance) / 100;                    
                 }
                 catch (Exception e)
                 {
-                    LogMng.Instance.onWriteStatus(string.Format("GetBalance exception: {0} {1}", e.Message, e.StackTrace));
+                    LogMng.Instance.onWriteStatus("You without Login.");
                 }
+                break;
             }
 
             LogMng.Instance.onWriteStatus(string.Format("GetBalance: {0}", balance));
             return balance;
         
+        }
+        
+
+        public void Close()
+        {
+
+        }
+
+        public void Feature()
+        {
+
+        }
+
+        public int GetPendingbets()
+        {
+            return 0;
+        }
+        public bool logout()
+        {
+            return true;
+        }
+
+        public bool Pulse()
+        {
+            return false;
+        }
+
+        public PROCESS_RESULT PlaceBet(List<BetburgerInfo> infos, out List<PROCESS_RESULT> result)
+        {
+            throw new NotImplementedException();
         }
     }
 #endif

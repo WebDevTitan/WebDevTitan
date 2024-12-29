@@ -12,7 +12,7 @@ namespace Protocol
         Type_2, //Park Horse
         Type_3, //SoccerLive Joe
         Type_4, //bs bet
-        Type_5, //openbet
+        Type_5, //openbet,goldbet
         Type_6, //Tradematesports
         Type_7, //Juan Live Soccer
         Type_8, //betspan
@@ -21,7 +21,7 @@ namespace Protocol
         Type_11, //telegram eurobet pick
         Type_12, //telegram ev channel pick (gustavo)
         Type_13, //Rebelbetting
-        Type_14,//seubet
+        Type_14, //seubet
         Type_15,
         Type_16,
         Type_17,

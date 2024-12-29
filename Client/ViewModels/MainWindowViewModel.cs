@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -97,8 +98,8 @@ namespace Project.ViewModels
             try
             {
                 string text = File.ReadAllText("bethistory.txt");
-                BetHistory = JsonConvert.DeserializeObject<List<BetResult>>(text);
-
+                //BetHistory = JsonConvert.DeserializeObject<List<BetResult>>(text);
+                BetHistory = JsonConvert.DeserializeObject<List<BetResult>>(text) ?? new List<BetResult>();
                 for (int i = BetHistory.Count - 1; i >= 0; i--)
                 {
                     if (DateTime.Now.Subtract(BetHistory[i].date).TotalDays > 2)
@@ -1481,7 +1482,6 @@ namespace Project.ViewModels
             File.AppendAllText(@"missed.txt", "extra: " + info.extra + Environment.NewLine);
             File.AppendAllText(@"missed.txt", "outcome: " + info.outcome + Environment.NewLine);
             File.AppendAllText(@"missed.txt", "odds: " + info.odds + Environment.NewLine);
-
         }
 
         List<BetburgerInfo> SaveList = new List<BetburgerInfo>();
@@ -1502,6 +1502,29 @@ namespace Project.ViewModels
                 }
             }
 
+            //List<BetburgerInfo> betburgerInfoList = new List<BetburgerInfo>();
+            //BetburgerInfo betInfo = new BetburgerInfo();
+            //betInfo.kind = PickKind.Type_1;
+            //betInfo.percent = decimal.Parse("17.546");
+            //betInfo.ROI = 7325;
+            //betInfo.bookmaker = "Goldbetshop";//
+            //betInfo.sport = "Hockey";//
+            //betInfo.homeTeam = "VAL Dor Foreurs";//
+            //betInfo.awayTeam = "Rouyn Noranda Huskies";//
+            //betInfo.eventTitle = "VAL Dor Foreurs - Rouyn Noranda Huskies";//
+            //betInfo.outcome = "Esito Finale 1X2";//
+            //betInfo.odds = 3.4;//
+            //betInfo.started = "29-12-2024 21:00";//
+            //betInfo.arbId = "MTY3NTkwMzMxMnwyNiwwLjAsLTIsMCwwLDA";
+            //betInfo.league = "Quebec Major Junior Hockey League";//
+            //betInfo.period = "with overtime and shootouts";
+            //betInfo.direct_link = "29083757228";//
+            //betInfo.siteUrl = "sport/hockey-ghiaccio/canada/quebec-major-junior-hockey-league/val-dor-foreurs-rouyn-noranda-huskies?tid=2868745&eid=12384089";//
+            //betInfo.raw_id = 12370605;
+            //betInfo.isLive = false;
+            //betInfo.color = "grey";
+
+            //betburgerInfoList.Add(betInfo);
             displayBetburger(betburgerInfoList);
 
             if (!Global.bRun)
@@ -1515,7 +1538,7 @@ namespace Project.ViewModels
 
                 if (Setting.Instance.bDailyBetCountLimit)
                 {
-                    int nTotdayCount = BetHistory.Select(a => a.date.Date == DateTime.Now.Date).Count();
+                     int nTotdayCount = BetHistory.Select(a => a.date.Date == DateTime.Now.Date).Count();
                     if (nTotdayCount >= Setting.Instance.nDailyBetCountLimit)
                     {
                         //LogMng.Instance.onWriteStatus("Ignore daily bet count...");
@@ -1655,13 +1678,13 @@ namespace Project.ViewModels
                         }
                     }
 #endif
-                    if (info.kind == PickKind.Type_1)
-                    {
-                        if (i % 2 == 0)
-                            info.opbookmaker = betburgerInfoList[i + 1].bookmaker;
-                        else
-                            info.opbookmaker = betburgerInfoList[i - 1].bookmaker;
-                    }
+                    //if (info.kind == PickKind.Type_1)
+                    //{
+                    //    if (i % 2 == 0)
+                    //        info.opbookmaker = betburgerInfoList[i + 1].bookmaker;
+                    //    else
+                    //        info.opbookmaker = betburgerInfoList[i - 1].bookmaker;
+                    //}
 
                     if (Setting.Instance.bAllowMajorLeaguesOnly)
                     {
@@ -2165,12 +2188,12 @@ namespace Project.ViewModels
                         //    LogMng.Instance.onWriteStatus("Ignore this pick because of corner");
                         //    continue;
                         //}
-
+#if(!GOLDBET)
                         if (!Setting.Instance.bSoccerLive)
                         {
                             continue;
                         }
-
+#endif
                         if (info.bookmaker != "bfsportsbook")
                         {
                             if (info.odds > Setting.Instance.maxOddsSoccerLive || info.odds < Setting.Instance.minOddsSoccerLive)
@@ -2186,15 +2209,15 @@ namespace Project.ViewModels
                                 continue;
                         }
 
-                        if (Global.TotalBalance <= 0)
-                        {
-                            Global.TotalBalance = Global.balance;
-                            if (Global.TotalBalance <= 0)
-                            {
-                                //LogMng.Instance.onWriteStatus($"[Ignorebet]Percentage Stake mode {Setting.Instance.stakeSoccerLive}%, but Current Balance is incorrect");
-                                continue;
-                            }
-                        }
+                        //if (Global.TotalBalance <= 0)
+                        //{
+                        //    Global.TotalBalance = Global.balance;
+                        //    if (Global.TotalBalance <= 0)
+                        //    {
+                        //        //LogMng.Instance.onWriteStatus($"[Ignorebet]Percentage Stake mode {Setting.Instance.stakeSoccerLive}%, but Current Balance is incorrect");
+                        //        continue;
+                        //    }
+                        //}
                         if (Setting.Instance.percentageStakeModeSoccerLive)
                         {
                             info.stake = Global.TotalBalance / 100 * Setting.Instance.stakeSoccerLive;
@@ -2667,20 +2690,8 @@ namespace Project.ViewModels
             threadReconnect = new Thread(new ParameterizedThreadStart(ReconnectThread));
             threadReconnect.IsBackground = true;
             threadReconnect.Start(0);
-#if (GOLDBET)
-            //threadlogin = new Thread(login);
-            //threadlogin.IsBackground = true;
-            //threadlogin.Start();
-#endif
         }
-#if (GOLDBET)
-        //private void login()
-        //{
-        //    if (bookieController == null)
-        //        bookieController = new GoldbetCtrl();
-        //    bookieController.login();
-        //}
-#endif
+
         bool bIsRunningConnectedServer = false;
         public void OnConnectedServer()
         {
@@ -2972,7 +2983,7 @@ namespace Project.ViewModels
 #if (TROUBLESHOT)
             string region = bookieController.getProxyLocation();
             
-            LogMng.Instance.onWriteStatus(string.Format("Region of Bot - {0}", region));
+            LogMng.Instance.onWriteStatus(string.Format("Region of Bot : {0}", region));
 #endif
             LogMng.Instance.onWriteStatus("Bot Start and login");                      
 
@@ -3176,7 +3187,7 @@ namespace Project.ViewModels
 #elif (PINNACLE)
             bookieController = new PinnacleCtrl();
 #elif (SUPERBET)
-            bookieController = new SuperbetCtrl();
+                    bookieController = (IBookieController)new SuperbetCtrl();
 #elif (STOIXIMAN || BETANO)
             bookieController = new StoiximanCtrl();
 //#elif (BETANO)

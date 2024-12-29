@@ -1,4 +1,45 @@
-﻿namespace Project.Bookie
+﻿using System.Collections.Generic;
+using System.Net.Http;
+using Protocol;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Runtime.InteropServices;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Security.Principal;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Web;
+using System.Web.UI.WebControls;
+using System.Windows;
+using System.Windows.Controls.Primitives;
+using System.Windows.Forms;
+using Gma.System.MouseKeyHook;
+using MasterDevs.ChromeDevTools.Protocol.Chrome.Emulation;
+using MySqlX.XDevAPI.Common;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using PlaywrightSharp;
+using PlaywrightSharp.Har;
+using Project.Helphers;
+using Project.Interfaces;
+using Protocol;
+using PuppeteerSharp;
+using Telegram.Bot.Types;
+using WebSocketSharp;
+using static MasterDevs.ChromeDevTools.Protocol.Chrome.ProtocolName;
+using static Project.Interfaces.CDPMouseController;
+using System.Net.Http.Headers;
+
+namespace Project.Bookie
 {
 #if (LOTTOMATICA)
     public class LottomaticaCtrl : IBookieController
@@ -32,13 +73,15 @@
         {
             try
             {
-                HttpResponseMessage resp = m_client.GetAsync("http://lumtest.com/myip.json").Result;
+                HttpClient httpClient = new HttpClient();
+                HttpResponseMessage resp= httpClient.GetAsync("http://lumtest.com/myip.json").Result;
                 var strContent = resp.Content.ReadAsStringAsync().Result;
-                var payload = JsonConvert.DeserializeObject<dynamic>(strContent);
-                return payload.ip.ToString() + " - " + payload.country.ToString();
+                dynamic json = JObject.Parse(strContent);                                
+                return json["geo"]["region_name"].ToString() + " - " + json["country"].ToString();
             }
             catch (Exception ex)
             {
+                LogMng.Instance.onWriteStatus($"getProxyLocation exception {ex.StackTrace} {ex.Message}");
             }
             return "UNKNOWN";
         }
@@ -440,6 +483,13 @@
             int rand = _rnd.Next(0, 10);
             Thread.Sleep((sec + rand / 10) * 1000);
         }
+
+        HttpClient IBookieController.initHttpClient(bool bUseNewCookie)
+        {
+            throw new System.NotImplementedException();
+        }
+
+       
     }
 #endif
 }

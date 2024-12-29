@@ -183,7 +183,7 @@
         </Grid>
         <Grid Grid.Row="0" Grid.Column="1" Background="#FF14805E" Name="TitlePanel">
             <DockPanel HorizontalAlignment="Right" VerticalAlignment="Top" >
-                <Button Width="30" Height="30" Background="Transparent" Command="{Binding WindowCommand}" CommandParameter="BROWSER" BorderBrush="Transparent">
+                <Button Width="30" Height="30" Background="Transparent" Command="{Binding WindowCommand}" CommandParameter="BROWSER" BorderBrush="Transparent" Click="Button_Click">
                     <fa5:SvgAwesome Icon="Solid_Home" Height="17" Opacity="0.6" Foreground="#FFC9E2D6"/>
                 </Button>
                 <Button Width="30" Height="30" Background="Transparent" Command="{Binding WindowCommand}" CommandParameter="MINIMIZE" BorderBrush="Transparent">
@@ -217,7 +217,7 @@
             <TextBlock Grid.Row="5" Text="Telegram   @betting_dev " TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="12" Padding="0,0" Foreground="#FFC9E2D6" Name="CopyrightsLabel" Visibility="Collapsed" Margin="92,0,58,0" Height="0" Width="0"/>
         </Grid>
         <Grid Grid.Row="1" Grid.Column="1" Margin="0, 0, 0, 0" Background="White">
-            <Grid Visibility="{Binding CurrentTab, ConverterParameter=BET, Converter={converters:StringToVisibilityConverter}}" d:IsHidden="True">
+            <Grid Visibility="{Binding CurrentTab, ConverterParameter=BET, Converter={converters:StringToVisibilityConverter}}" d:IsHidden="False">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="41"/>
                     <RowDefinition Height="1*"/>
@@ -298,7 +298,7 @@
                     <TextBlock Grid.Row="0" Style="{StaticResource ContentsDescription}" Text="Server Valuebet" Height="20"/>
                     <Grid Grid.Row="1">
                         <Border BorderBrush="{StaticResource ControlBorder}" BorderThickness="0 0 0 2" />
-                        <DataGrid GridLinesVisibility="None" VerticalGridLinesBrush="#FF151414" AutoGenerateColumns="False" CanUserSortColumns="False" HeadersVisibility="All" IsReadOnly="True" ItemsSource="{Binding ServerSureBetList}" Background="White">
+                        <DataGrid GridLinesVisibility="None" VerticalGridLinesBrush="#FF151414" AutoGenerateColumns="False" CanUserSortColumns="False" HeadersVisibility="All" IsReadOnly="True" ItemsSource="{Binding ServerSureBetList}" Background="White" SelectionChanged="DataGrid_SelectionChanged">
                             <DataGrid.RowHeaderStyle>
                                 <Style>
                                     <Setter Property="Control.Background" Value="Transparent"/>
@@ -379,7 +379,7 @@
                     </Grid>
                 </Grid>
             </Grid>
-            <Grid Visibility="{Binding CurrentTab, ConverterParameter=SETTING, Converter={converters:StringToVisibilityConverter}}" d:IsHidden="False">
+            <Grid Visibility="{Binding CurrentTab, ConverterParameter=SETTING, Converter={converters:StringToVisibilityConverter}}" d:IsHidden="True">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="41"/>
                     <RowDefinition Height="593"/>
@@ -531,11 +531,11 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Right" Text="Stake" Margin="0,0,10,0" Width="60" HorizontalAlignment="Right" Grid.Column="0"/>
                         <StackPanel Orientation="Horizontal" Grid.Column="1">
-                            <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.StakeSports}" Width="40" Margin="0"/>
-                            <CheckBox IsChecked="{Binding SettingViewModel.EnableStakeSportsTo}" Foreground="Black" VerticalAlignment="Center" Height="20" Visibility="Visible" Margin="10,5,5,0" Name="EnableStakeTo" IsEnabled="{Binding ElementName=StakePercentage, Path=IsChecked, Converter={StaticResource oppositeConverter}}">to</CheckBox>
-                            <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.StakeSportsTo}" Width="40" Margin="0" IsEnabled="{Binding ElementName=EnableStakeTo, Path=IsChecked}"/>
+                            <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.StakeSports}" Width="40" TextChanged="TextBox_TextChanged_2"/>
+                            <CheckBox IsChecked="{Binding SettingViewModel.EnableStakeSportsTo}" Foreground="Black" VerticalAlignment="Center" Height="20" Visibility="Visible" Margin="10,5,5,0" x:Name="EnableStakeTo" IsEnabled="{Binding IsChecked, Converter={StaticResource oppositeConverter}, ElementName=StakePercentage}" Content="to"/>
+                            <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.StakeSportsTo}" Width="40" Margin="0" IsEnabled="{Binding IsChecked, ElementName=EnableStakeTo}"/>
                             <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Left" Text="(for set range stake)" Margin="5,5,0,0" Width="110" Foreground="Gray"/>
-                            <CheckBox IsChecked="{Binding SettingViewModel.PercentageStakeMode}" Foreground="Black" VerticalAlignment="Center" Height="20" Visibility="Visible" Margin="10,5,5,0" Name="StakePercentage">% Mode</CheckBox>
+                            <CheckBox IsChecked="{Binding SettingViewModel.PercentageStakeMode}" Foreground="Black" VerticalAlignment="Center" Height="20" Visibility="Visible" Margin="10,5,5,0" x:Name="StakePercentage" Content="% Mode"/>
                         </StackPanel>
                         <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Top" Visibility="Visible" Name="RangeStakePanel" Grid.Row="1" Grid.Column="1">
                             <StackPanel Orientation="Horizontal">
@@ -596,7 +596,11 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock Style="{StaticResource ContentsDescription}" VerticalAlignment="Top" Padding="0,5" TextAlignment="Center" Text="Extra" Grid.Column="0" Height="26" Width="70" FontWeight="Bold"/>
                         <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,5,0,0" Name="Tipster2Panel" Visibility="Visible" Grid.Column="1">
-                            <CheckBox HorizontalAlignment="Left" IsChecked="{Binding SettingViewModel.EnableTipster2}" Width="120" FontWeight="Bold" Height="20" Visibility="Visible" Name="EnableTipster2">Tipster2</CheckBox>
+                            <CheckBox HorizontalAlignment="Left" IsChecked="{Binding SettingViewModel.EnableTipster2}" Width="120" FontWeight="Bold" Height="20" Name="EnableTipster2" IsEnabled="True">
+                                <CheckBox.Background>
+                                    <ImageBrush Stretch="Fill"/>
+                                </CheckBox.Background> Tipster2
+                            </CheckBox>
                             <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" VerticalAlignment="Top" Height="20" Margin="15,0,0,0" Width="164">
                                 <TextBlock Style="{StaticResource ContentsDescription}" TextAlignment="Right" Text="Stake" Margin="0,2" Padding="0,0,6,0" Width="60"/>
                                 <TextBox Style="{StaticResource ContentsValue}" Text="{Binding SettingViewModel.StakePerTipster2}" Margin="0" Width="30" Height="20" IsEnabled="{Binding ElementName=EnableTipster2, Path=IsChecked}"/>

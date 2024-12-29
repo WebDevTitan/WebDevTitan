@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Security.Policy;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -103,6 +106,12 @@ namespace Project.Interfaces
         public string restore_login_message = string.Empty;
         public string user_identify_message = string.Empty;
         public List<string> websocket_request_contents = null;
+        //Goldbet
+        public string strRequestUrl = "";
+        public string strPlaceBetResult = "";
+        public string strbalance = "";     
+        public string RequestIdto = "";
+
 
         //Bet365 
         public bool WaitingForLogin = false;
@@ -213,7 +222,6 @@ namespace Project.Interfaces
                             try
                             {
                                 string requestUrl = sendedRequest.Request.Url.ToLower();
-
                             }
                             catch { }
                         });
@@ -539,6 +547,7 @@ namespace Project.Interfaces
                                         while (retryCnt-- > 0)
                                         {
                                             var result = (await _chromeSession.SendAsync(new GetResponseBodyCommand() { RequestId = e.RequestId })).Result;
+                                            RequestIdto = e.RequestId;
                                             if (result == null)
                                             {
                                                 Thread.Sleep(500);
@@ -547,11 +556,25 @@ namespace Project.Interfaces
                                             string responseBody = result.Body;
 
                                             JObject jResp = JObject.Parse(responseBody);
-                                            balanceRespBody = jResp["Saldo"].ToString();
-                                            isLogged = true;
+                                            strbalance = jResp["Saldo"].ToString();                                           
                                             break;
                                         }
-                                    }
+                                    }///Goldbet insertbet
+                                    //else if (resp_url.ToLower().Contains("/api/sport/live/getOverviewLive?"))
+                                    //{
+                                    //    int retryCnt = 3;
+                                    //    while (retryCnt-- > 0)
+                                    //    {
+                                    //        var result = (await _chromeSession.SendAsync(new GetResponseBodyCommand() { RequestId = e.RequestId })).Result;
+                                    //        if (result == null)
+                                    //        {
+                                    //            Thread.Sleep(500);
+                                    //            continue;
+                                    //        }
+                                    //        AddBetRespBody = result.Body;                                           
+                                    //        break;
+                                    //    }
+                                    //}
 
                                     //Tonybet
                                     else if (resp_url.ToLower().Contains("tonybet") && resp_url.Contains("/api/auth"))
@@ -908,7 +931,6 @@ namespace Project.Interfaces
                                                 }
                                                 if (result.Body == "[null]")
                                                     break;
-
 
                                                 AddBetRespBody = result.Body;
                                                 break;
@@ -1288,7 +1310,7 @@ namespace Project.Interfaces
             try
             {
                 if (!requiredResult)
-                    _chromeSession.SendAsync(new EvaluateCommand() { Expression = jsCode }).Wait();
+                    _chromeSession.SendAsync(new EvaluateCommand() { Expression = jsCode }).Wait();                
                 else
                 {
                     var script = _chromeSession.SendAsync(new EvaluateCommand() { Expression = jsCode, AwaitPromise = awaitPromise }).Result.Result;
@@ -1301,6 +1323,67 @@ namespace Project.Interfaces
             catch { }
             return result;
         }
+        ////Goldbet
+        //public async void ExecuteScriptAndGetResponse(string jsCode, string url)
+        //{
+        //    var targetInfo = _chromeSession.SendAsync(new CreateTargetCommand() { Url = url }).Result;
+
+        //    var allSessions = _browserObj.GetSessionInfo().Result;
+        //    int retryCnt = 0;
+        //    foreach (var session in allSessions)
+        //    {
+        //        _chromeSession.Dispose();
+
+        //        _chromeSession = _chromeSessionFactory.Create(session.WebSocketDebuggerUrl) as ChromeSession;
+
+        //        string scriptResult = File.ReadAllText("inject.txt");
+        //        var injectResult = _chromeSession.SendAsync(new AddScriptToEvaluateOnNewDocumentCommand() { Source = scriptResult }).Result;
+
+        //        var domEnableResult = _chromeSession.SendAsync<MasterDevs.ChromeDevTools.Protocol.Chrome.DOM.EnableCommand>().Result;
+        //        var networkEnableResult = _chromeSession.SendAsync<MasterDevs.ChromeDevTools.Protocol.Chrome.Network.EnableCommand>().Result;
+        //        var pageEnableResult = _chromeSession.SendAsync<MasterDevs.ChromeDevTools.Protocol.Chrome.Page.EnableCommand>().Result;
+
+        //        _chromeSession.Subscribe<ResponseReceivedEvent>(e =>
+        //        {
+        //            Task.Run(async () =>
+        //            {
+        //                try
+        //                {
+        //                    var resp_url = e.Response.Url;
+        //                    if (resp_url.Contains("/api/sport/live/getOverviewLive?"))
+        //                    {
+        //                        while (retryCnt < 4)
+        //                        {
+        //                            _chromeSession.SendAsync(new EvaluateCommand() { Expression = jsCode }).Wait();
+        //                            var result = (await _chromeSession.SendAsync(new GetResponseBodyCommand() { RequestId = RequestIdto })).Result;
+
+        //                            if (result == null)
+        //                            {
+        //                                retryCnt++;
+        //                                Thread.Sleep(500);
+        //                                continue;
+        //                            }
+        //                            PlaceBetRespBody = result.Body;
+        //                            break;
+        //                        }
+        //                    }
+        //                }
+
+
+        //                catch (Exception ex)
+        //                {
+        //                    LogMng.Instance.onWriteStatus("ExecuteScriptAndGetResponse: " + ex.ToString());
+        //                }
+        //            });
+        //        });
+        //        }
+        //}
+                
+
+        
+
+
+
         public async Task<CookieContainer> GetCoookies()
         {
             CookieContainer container = new CookieContainer();
@@ -1573,6 +1656,7 @@ namespace Project.Interfaces
             }
             catch { }
         }
+        
         public void Close_Browser()
         {
             try
